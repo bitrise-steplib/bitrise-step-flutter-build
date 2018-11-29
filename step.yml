@@ -23,23 +23,23 @@ toolkit:
     package_name: github.com/bitrise-steplib/bitrise-step-flutter-build
 
 inputs:
-  # - version: v0.11.9
-  #   opts:
-  #     title: "Flutter SDK Version"
-  #     summary: "The tag or branch of the Flutter SDK's git repository."
-  #     description: |-
-  #       The tag or branch of the Flutter SDK's git repository. 
-      
-  #       To find the available version tags see this list: https://github.com/flutter/flutter/releases
-
-  #       To see the the avilable branches visit: https://github.com/flutter/flutter/branches
-  #     is_required: true
-  # - overwrite: true
-  #   opts:
-  #     title: "Overwrite currently installed version"
-  #     summary: "The currently installed Flutter SDK will be overwritten if this option is set to true"
-  #     description: "The currently installed Flutter SDK will be overwritten if this option is set to true"
-  #     is_required: true
-  #     value_options:
-  #       - "false"
-  #       - "true"
+  - platform: both
+    opts:
+      title: "Platform"
+      summary: "The selected platform will be built, or both iOs and Android if you select both"
+      description: "The selected platform will be built, or both iOs and Android if you select both"
+      is_required: true
+      value_options:
+        - "both"
+        - "ios"
+        - "android"
+  - ios_additional_params: "--debug"
+    opts:
+      title: "Additional parameters for iOS build"
+      summary: "Additional parameters for iOS build"
+      description: Additional parameters for iOS build
+  - android_additional_params: "--debug"
+    opts:
+      title: "Additional parameters for Android build"
+      summary: "Additional parameters for Android build"
+      description: Additional parameters for Android build

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 
 	"github.com/bitrise-tools/go-steputils/stepconf"
@@ -19,6 +21,24 @@ func failf(msg string, args ...interface{}) {
 	os.Exit(1)
 }
 
+func exportIosArtifacts() error {
+	return nil
+}
+
+func exportAndroidArtifacts() error {
+	return nil
+}
+
+func build(platform string, args ...string) error {
+	buildCmd := command.New("flutter", append([]string{"build", platform}, args...)...).SetStdout(os.Stdout)
+
+	fmt.Println()
+	log.Donef("$ %s", buildCmd.PrintableCommandArgs())
+	fmt.Println()
+
+	return buildCmd.Run()
+}
+
 func main() {
 	var cfg config
 	if err := stepconf.Parse(&cfg); err != nil {
@@ -26,69 +46,29 @@ func main() {
 	}
 	stepconf.Print(cfg)
 
-	// isInstalled := true
-	// if _, err := exec.LookPath("flutter"); err != nil {
-	// 	isInstalled = false
-	// }
+	if cfg.Platform == "both" || cfg.Platform == "ios" {
+		fmt.Println()
+		log.Infof("Build iOS")
 
-	// if cfg.Overwrite || !isInstalled {
-	// 	fmt.Println()
-	// 	log.Infof("Downloading Flutter SDK")
-	// 	log.Printf("git clone")
+		if err := build("ios"); err != nil {
+			failf("Failed to build iOS platform, error: %s", err)
+		}
 
-	// 	sdkLocation := filepath.Join(os.Getenv("HOME"), "flutter-sdk")
+		if err := exportIosArtifacts(); err != nil {
+			failf("Failed to export iOS artifacts, error: %s", err)
+		}
+	}
 
-	// 	if err := os.RemoveAll(sdkLocation); err != nil {
-	// 		failf("Failed to remove path(%s), error: %s", sdkLocation, err)
-	// 	}
+	if cfg.Platform == "both" || cfg.Platform == "android" {
+		fmt.Println()
+		log.Infof("Build Android")
 
-	// 	gitRepo, err := git.New(sdkLocation)
-	// 	if err != nil {
-	// 		failf("Failed to open git repo, error: %s", err)
-	// 	}
+		if err := build("apk"); err != nil {
+			failf("Failed to build Android platform, error: %s", err)
+		}
 
-	// 	if err := gitRepo.CloneTagOrBranch("https://github.com/flutter/flutter.git", cfg.Version).Run(); err != nil {
-	// 		failf("Failed to clone git repo for tag/branch: %s, error: %s", cfg.Version, err)
-	// 	}
-
-	// 	log.Printf("set in $PATH")
-
-	// 	path := filepath.Join(sdkLocation, "bin") + ":" + os.Getenv("PATH")
-
-	// 	if err := os.Setenv("PATH", path); err != nil {
-	// 		failf("Failed to set env, error: %s", err)
-	// 	}
-
-	// 	if err := tools.ExportEnvironmentWithEnvman("PATH", path); err != nil {
-	// 		failf("Failed to export env with envman, error: %s", err)
-	// 	}
-
-	// 	log.Donef("Done")
-	// }
-
-	// fmt.Println()
-	// log.Infof("Flutter version")
-
-	// versionCmd := command.New("flutter", "--version").SetStdout(os.Stdout)
-
-	// fmt.Println()
-	// log.Donef("$ %s", versionCmd.PrintableCommandArgs())
-	// fmt.Println()
-
-	// if err := versionCmd.Run(); err != nil {
-	// 	failf("Failed to check flutter version, error: %s", err)
-	// }
-
-	// fmt.Println()
-	// log.Infof("Check flutter doctor")
-
-	// doctorCmd := command.New("flutter", "doctor").SetStdout(os.Stdout)
-
-	// fmt.Println()
-	// log.Donef("$ %s", doctorCmd.PrintableCommandArgs())
-	// fmt.Println()
-
-	// if err := doctorCmd.Run(); err != nil {
-	// 	failf("Failed to check flutter doctor, error: %s", err)
-	// }
+		if err := exportAndroidArtifacts(); err != nil {
+			failf("Failed to export Android artifacts, error: %s", err)
+		}
+	}
 }

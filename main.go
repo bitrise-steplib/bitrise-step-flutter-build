@@ -6,13 +6,13 @@ import (
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
-
 	"github.com/bitrise-tools/go-steputils/stepconf"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
 type config struct {
 	Platform                string `env:"platform,opt[both,ios,android]"`
-	IosAdditionalParams     string `env:"ios_additional_params"`
+	IOSAdditionalParams     string `env:"ios_additional_params"`
 	AndroidAdditionalParams string `env:"android_additional_params"`
 }
 
@@ -29,14 +29,14 @@ func exportAndroidArtifacts() error {
 	return nil
 }
 
-func build(platform string, args ...string) error {
-	buildCmd := command.New("flutter", append([]string{"build", platform}, args...)...).SetStdout(os.Stdout)
+func build(platform string, params string) (*command.Model, error) {
+	paramSlice, err := shellquote.Split(params)
+	if err != nil {
+		return nil, err
+	}
 
-	fmt.Println()
-	log.Donef("$ %s", buildCmd.PrintableCommandArgs())
-	fmt.Println()
-
-	return buildCmd.Run()
+	buildArgs := []string{"build", platform}
+	return command.New("flutter", append(buildArgs, paramSlice...)...).SetStdout(os.Stdout).SetStderr(os.Stderr), nil
 }
 
 func main() {
@@ -50,7 +50,16 @@ func main() {
 		fmt.Println()
 		log.Infof("Build iOS")
 
-		if err := build("ios"); err != nil {
+		iOSBuildCmd, err := build("ios", cfg.IOSAdditionalParams)
+		if err != nil {
+			failf("Failed to generate iOS build command, error: %s", err)
+		}
+
+		fmt.Println()
+		log.Donef("$ %s", iOSBuildCmd.PrintableCommandArgs())
+		fmt.Println()
+
+		if err := iOSBuildCmd.Run(); err != nil {
 			failf("Failed to build iOS platform, error: %s", err)
 		}
 
@@ -63,7 +72,16 @@ func main() {
 		fmt.Println()
 		log.Infof("Build Android")
 
-		if err := build("apk"); err != nil {
+		androidBuildCmd, err := build("apk", cfg.AndroidAdditionalParams)
+		if err != nil {
+			failf("Failed to generate Android build command, error: %s", err)
+		}
+
+		fmt.Println()
+		log.Donef("$ %s", androidBuildCmd.PrintableCommandArgs())
+		fmt.Println()
+
+		if err := androidBuildCmd.Run(); err != nil {
 			failf("Failed to build Android platform, error: %s", err)
 		}
 

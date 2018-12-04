@@ -1,15 +1,9 @@
-title: |-
-  Flutter Build
-summary: |
-  This step will build a Flutter project
-description: |
-  This step will build a Flutter project
+title: Flutter Build
+summary: This step will build a Flutter project
+description: This step will build a Flutter project
 website: https://github.com/bitrise-steplib/bitrise-step-flutter-build
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-flutter-build
 support_url: https://github.com/bitrise-steplib/bitrise-step-flutter-build/issues
-host_os_tags:
-  - osx-10.10
-  - ubuntu-16.04
 
 type_tags:
   - build

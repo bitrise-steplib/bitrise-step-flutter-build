@@ -18,11 +18,23 @@ workflows:
     - go-test:
     - git::https://github.com/bitrise-steplib/bitrise-step-flutter-installer@dev:
     after_run:
-    - test_iOS
-    - test_android
-    - test_both
+    - _test_iOS
+    - _test_android
+    - _test_both
+
+  ci-android-only:
+    before_run:
+    - audit-this-step
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+    - git::https://github.com/bitrise-steplib/bitrise-step-flutter-installer@dev:
+    after_run:
+    - _test_android
     
-  test_iOS:
+  _test_iOS:
     before_run:
     - _clear_workdir
     steps:
@@ -34,7 +46,7 @@ workflows:
         inputs: 
         - platform: ios
 
-  test_android:
+  _test_android:
     before_run:
     - _clear_workdir
     steps:
@@ -46,7 +58,7 @@ workflows:
         inputs: 
         - platform: android
 
-  test_both:
+  _test_both:
     before_run:
     - _clear_workdir
     steps:

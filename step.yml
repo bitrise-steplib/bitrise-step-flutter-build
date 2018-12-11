@@ -20,20 +20,42 @@ inputs:
   - platform: both
     opts:
       title: "Platform"
-      summary: "The selected platform will be built, or both iOs and Android if you select both"
+      summary: "The selected platform will be built, or both iOS and Android if you select both"
       description: "The selected platform will be built, or both iOs and Android if you select both"
       is_required: true
       value_options:
         - "both"
         - "ios"
         - "android"
-  - ios_additional_params: "--debug"
+  - ios_additional_params: "--release"
     opts:
-      title: "Additional parameters for iOS build"
-      summary: "Additional parameters for iOS build"
-      description: Additional parameters for iOS build
-  - android_additional_params: "--debug"
+      category: "Additional parameters"
+      title: "For iOS build"
+      summary: "The flags from this input field will be appended to the `flutter build ios` command."
+      description: "The flags from this input field will be appended to the `flutter build ios` command."
+  - android_additional_params: "--release"
     opts:
-      title: "Additional parameters for Android build"
-      summary: "Additional parameters for Android build"
-      description: Additional parameters for Android build
+      category: "Additional parameters"
+      title: "For Android build"
+      summary: "The flags from this input field will be appended to the `flutter build apk` command."
+      description: "The flags from this input field will be appended to the `flutter build apk` command."
+  - ios_output_pattern: "*build/ios/iphoneos/*.app"
+    opts:
+      category: "Export options"
+      title: "iOS output pattern"
+      summary: "The output files will be exported from the output path that matches this pattern."
+      description: "The output files will be exported from the output path that matches this pattern."
+  - android_output_pattern: "*build/app/outputs/apk/*/app-*.apk"
+    opts:
+      category: "Export options"
+      title: "Android output pattern"
+      summary: "The output files will be exported from the output path that matches this pattern."
+      description: "The output files will be exported from the output path that matches this pattern."
+
+outputs:
+  - BITRISE_APK_PATH:
+    opts:
+      title: The created .apk file's path
+  - BITRISE_APP_DIR_PATH:
+    opts:
+      title: The generated .app directory

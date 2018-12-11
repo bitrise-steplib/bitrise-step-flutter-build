@@ -4,39 +4,21 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-tools/go-steputils/stepconf"
-	shellquote "github.com/kballard/go-shellquote"
 )
 
 type config struct {
-	Platform                string `env:"platform,opt[both,ios,android]"`
 	IOSAdditionalParams     string `env:"ios_additional_params"`
 	AndroidAdditionalParams string `env:"android_additional_params"`
+	Platform                string `env:"platform,opt[both,ios,android]"`
+	IOSExportPattern        string `env:"ios_output_pattern"`
+	AndroidExportPattern    string `env:"android_output_pattern"`
 }
 
 func failf(msg string, args ...interface{}) {
 	log.Errorf(msg, args...)
 	os.Exit(1)
-}
-
-func exportIosArtifacts() error {
-	return nil
-}
-
-func exportAndroidArtifacts() error {
-	return nil
-}
-
-func build(platform string, params string) (*command.Model, error) {
-	paramSlice, err := shellquote.Split(params)
-	if err != nil {
-		return nil, err
-	}
-
-	buildArgs := []string{"build", platform}
-	return command.New("flutter", append(buildArgs, paramSlice...)...).SetStdout(os.Stdout).SetStderr(os.Stderr), nil
 }
 
 func main() {
@@ -46,47 +28,37 @@ func main() {
 	}
 	stepconf.Print(cfg)
 
-	if cfg.Platform == "both" || cfg.Platform == "ios" {
-		fmt.Println()
-		log.Infof("Build iOS")
-
-		iOSBuildCmd, err := build("ios", cfg.IOSAdditionalParams)
-		if err != nil {
-			failf("Failed to generate iOS build command, error: %s", err)
+	for _, spec := range []buildSpecification{
+		buildSpecification{
+			displayName:          "iOS",
+			platformCmdFlag:      "ios",
+			platformSelectors:    []string{"both", "ios"},
+			outputPathPattern:    cfg.IOSExportPattern,
+			additionalParameters: cfg.IOSAdditionalParams,
+		},
+		buildSpecification{
+			displayName:          "Android",
+			platformCmdFlag:      "apk",
+			platformSelectors:    []string{"both", "android"},
+			outputPathPattern:    cfg.AndroidExportPattern,
+			additionalParameters: cfg.AndroidAdditionalParams,
+		},
+	} {
+		if !spec.buildable(cfg.Platform) {
+			continue
 		}
 
 		fmt.Println()
-		log.Donef("$ %s", iOSBuildCmd.PrintableCommandArgs())
-		fmt.Println()
-
-		if err := iOSBuildCmd.Run(); err != nil {
-			failf("Failed to build iOS platform, error: %s", err)
-		}
-
-		if err := exportIosArtifacts(); err != nil {
-			failf("Failed to export iOS artifacts, error: %s", err)
-		}
-	}
-
-	if cfg.Platform == "both" || cfg.Platform == "android" {
-		fmt.Println()
-		log.Infof("Build Android")
-
-		androidBuildCmd, err := build("apk", cfg.AndroidAdditionalParams)
-		if err != nil {
-			failf("Failed to generate Android build command, error: %s", err)
+		log.Infof("Build " + spec.displayName)
+		if err := spec.build(spec.additionalParameters); err != nil {
+			failf("Failed to build %s platform, error: %s", spec.displayName, err)
 		}
 
 		fmt.Println()
-		log.Donef("$ %s", androidBuildCmd.PrintableCommandArgs())
-		fmt.Println()
+		log.Infof("Export " + spec.displayName + " artifact")
 
-		if err := androidBuildCmd.Run(); err != nil {
-			failf("Failed to build Android platform, error: %s", err)
-		}
-
-		if err := exportAndroidArtifacts(); err != nil {
-			failf("Failed to export Android artifacts, error: %s", err)
+		if err := spec.exportArtifacts(spec.outputPathPattern); err != nil {
+			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
 	}
 }

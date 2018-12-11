@@ -21,11 +21,7 @@ workflows:
     - test_iOS
     - test_android
     - test_both
-    - test_iOS_with_additional
-    - test_android_with_additional
-    - test_both_with_additional
     
-
   test_iOS:
     before_run:
     - _clear_workdir
@@ -33,7 +29,7 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL .
+        - content: git clone $SAMPLE_APP_URL -b manual .
     - path::./:
         inputs: 
         - platform: ios
@@ -57,50 +53,10 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL .
+        - content: git clone $SAMPLE_APP_URL -b manual .
     - path::./:
         inputs: 
         - platform: both
-
-  test_iOS_with_additional:
-    before_run:
-    - _clear_workdir
-    steps:
-    - script:
-        title: Clone sample app
-        inputs:
-        - content: git clone $SAMPLE_APP_URL .
-    - path::./:
-        inputs: 
-        - platform: ios
-        - ios_additional_params: --release
-
-  test_android_with_additional:
-    before_run:
-    - _clear_workdir
-    steps:
-    - script:
-        title: Clone sample app
-        inputs:
-        - content: git clone $SAMPLE_APP_URL .
-    - path::./:
-        inputs: 
-        - platform: android
-        - android_additional_params: --release
-
-  test_both_with_additional:
-    before_run:
-    - _clear_workdir
-    steps:
-    - script:
-        title: Clone sample app
-        inputs:
-        - content: git clone $SAMPLE_APP_URL .
-    - path::./:
-        inputs: 
-        - platform: both
-        - android_additional_params: --release
-        - android_additional_params: --release
 
   _clear_workdir:
     envs:

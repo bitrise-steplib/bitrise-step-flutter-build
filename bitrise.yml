@@ -16,7 +16,7 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
-    - git::https://github.com/bitrise-steplib/bitrise-step-flutter-installer@develop:
+    - flutter-installer:
     after_run:
     - _test_iOS
     - _test_android
@@ -30,7 +30,7 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
-    - git::https://github.com/bitrise-steplib/bitrise-step-flutter-installer@develop:
+    - flutter-installer:
     after_run:
     - _test_android
     

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
@@ -102,14 +105,29 @@ func (spec buildSpecification) build(params string) error {
 		return err
 	}
 
-	buildCmd := command.New("flutter", append([]string{"build", spec.platformCmdFlag},
-		paramSlice...)...).
-		SetStdout(os.Stdout).
-		SetStderr(os.Stderr)
+	var errorWriter io.Writer = os.Stderr
+	var errBuffer bytes.Buffer
+
+	buildCmd := command.New("flutter", append([]string{"build", spec.platformCmdFlag}, paramSlice...)...).SetStdout(os.Stdout)
+
+	if spec.platformCmdFlag == "ios" {
+		buildCmd.SetStdin(strings.NewReader("a"))
+		errorWriter = io.MultiWriter(os.Stderr, &errBuffer)
+	}
+
+	buildCmd.SetStderr(errorWriter)
 
 	fmt.Println()
 	log.Donef("$ %s", buildCmd.PrintableCommandArgs())
 	fmt.Println()
 
-	return buildCmd.Run()
+	err = buildCmd.Run()
+
+	if spec.platformCmdFlag == "ios" {
+		if strings.Contains(strings.ToLower(errBuffer.String()), "code signing is required") {
+			return errCodeSign
+		}
+	}
+
+	return err
 }

@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:85393b915166ab4c4adc6578bdfaf778738b1b8a265a2f7555904755199c1d6f"
+  digest = "1:454f7f6fcec51499ec9cb51c571ee30fddd21e7a472f85e83094c86a364ee316"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -13,6 +13,8 @@
     "log",
     "parseutil",
     "pathutil",
+    "pkcs12",
+    "pkcs12/internal/rc2",
     "pointers",
     "sliceutil",
     "ziputil",
@@ -34,11 +36,27 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:e685326d1f4c14a4169e2f494abad32cc004c0dd8a953c9ee1c6962d346347b3"
+  name = "github.com/bitrise-tools/go-xcode"
+  packages = ["certificateutil"]
+  pruneopts = "UT"
+  revision = "82aa5ad881aad17afd7b73af03dabc4ef89b8a53"
+
+[[projects]]
+  branch = "master"
   digest = "1:400e113a367b511b9b09ca642ee11d9885485a93838526d697033af334a2fdde"
   name = "github.com/kballard/go-shellquote"
   packages = ["."]
   pruneopts = "UT"
   revision = "95032a82bc518f77982ea72343cc1ade730072f0"
+
+[[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   digest = "1:0e792eea6c96ec55ff302ef33886acbaa5006e900fefe82689e88d96439dcd84"
@@ -59,6 +77,7 @@
     "github.com/bitrise-tools/go-steputils/output",
     "github.com/bitrise-tools/go-steputils/stepconf",
     "github.com/bitrise-tools/go-steputils/tools",
+    "github.com/bitrise-tools/go-xcode/certificateutil",
     "github.com/kballard/go-shellquote",
     "github.com/ryanuber/go-glob",
   ]

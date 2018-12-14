@@ -27,6 +27,7 @@ type config struct {
 	IOSExportPattern        string `env:"ios_output_pattern"`
 	AndroidExportPattern    string `env:"android_output_pattern"`
 	IOSCodesignIdentity     string `env:"ios_codesign_identity"`
+	ProjectLocation         string `env:"project_location,required"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -114,6 +115,7 @@ build:
 			platformSelectors:    []string{"both", "ios"},
 			outputPathPattern:    cfg.IOSExportPattern,
 			additionalParameters: cfg.IOSAdditionalParams,
+			projectLocation:      cfg.ProjectLocation,
 		},
 		buildSpecification{
 			displayName:          "Android",
@@ -121,6 +123,7 @@ build:
 			platformSelectors:    []string{"both", "android"},
 			outputPathPattern:    cfg.AndroidExportPattern,
 			additionalParameters: cfg.AndroidAdditionalParams,
+			projectLocation:      cfg.ProjectLocation,
 		},
 	} {
 		if !spec.buildable(cfg.Platform) {

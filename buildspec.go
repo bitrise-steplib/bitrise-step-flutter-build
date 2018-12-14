@@ -24,14 +24,14 @@ type buildSpecification struct {
 	platformSelectors    []string
 	outputPathPattern    string
 	additionalParameters string
+	projectLocation      string
 }
 
 func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
-	location := os.Getenv("BITRISE_SOURCE_DIR")
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
 	switch spec.platformCmdFlag {
 	case "apk":
-		paths, err := findPaths(location, outputPathPattern, false)
+		paths, err := findPaths(spec.projectLocation, outputPathPattern, false)
 		if err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 		log.Donef("- $BITRISE_APK_PATH_LIST: " + strings.Join(deployedApks, "|"))
 		return nil
 	case "ios":
-		paths, err := findPaths(location, outputPathPattern, true)
+		paths, err := findPaths(spec.projectLocation, outputPathPattern, true)
 		if err != nil {
 			return err
 		}
@@ -125,6 +125,8 @@ func (spec buildSpecification) build(params string) error {
 	fmt.Println()
 	log.Donef("$ %s", buildCmd.PrintableCommandArgs())
 	fmt.Println()
+
+	buildCmd.SetDir(spec.projectLocation)
 
 	err = buildCmd.Run()
 

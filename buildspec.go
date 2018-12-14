@@ -31,23 +31,36 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
 	switch spec.platformCmdFlag {
 	case "apk":
-		path, err := findPath(location, outputPathPattern, false)
-		if err != nil && path == "" {
+		paths, err := findPaths(location, outputPathPattern, false)
+		if err != nil {
 			return err
 		}
 
-		deployedFilePath := filepath.Join(deployDir, filepath.Base(path))
+		var deployedApks []string
+		for _, path := range paths {
+			deployedFilePath := filepath.Join(deployDir, filepath.Base(path))
 
-		if err := output.ExportOutputFile(path, deployedFilePath, "BITRISE_APK_PATH"); err != nil {
-			return err
+			if err := output.ExportOutputFile(path, deployedFilePath, "BITRISE_APK_PATH"); err != nil {
+				return err
+			}
+			deployedApks = append(deployedApks, deployedFilePath)
 		}
-		log.Donef("- $BITRISE_APK_PATH: " + deployedFilePath)
+		if err := tools.ExportEnvironmentWithEnvman("BITRISE_APK_PATH_LIST", strings.Join(deployedApks, "\n")); err != nil {
 
-		return err
+		}
+
+		log.Donef("- $BITRISE_APK_PATH: " + deployedApks[len(deployedApks)-1])
+		log.Donef("- $BITRISE_APK_PATH_LIST: " + strings.Join(deployedApks, "|"))
+		return nil
 	case "ios":
-		path, err := findPath(location, outputPathPattern, true)
-		if err != nil && path == "" {
+		paths, err := findPaths(location, outputPathPattern, true)
+		if err != nil {
 			return err
+		}
+
+		path := paths[len(paths)-1]
+		if len(paths) > 1 {
+			log.Warnf("- Multiple artifacts found for pattern \"%s\": %v, exporting %s", outputPathPattern, paths, path)
 		}
 
 		fileName := filepath.Base(path)
@@ -62,7 +75,7 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 		}
 		log.Donef("- $BITRISE_APP_DIR_PATH: " + path)
 
-		return err
+		return nil
 	default:
 		return fmt.Errorf("unsupported platform for exporting artifacts")
 	}
@@ -72,7 +85,7 @@ func (spec buildSpecification) buildable(platform string) bool {
 	return sliceutil.IsStringInSlice(platform, spec.platformSelectors)
 }
 
-func findPath(location string, outputPathPattern string, dir bool) (out string, err error) {
+func findPaths(location string, outputPathPattern string, dir bool) (out []string, err error) {
 	err = filepath.Walk(location, func(path string, info os.FileInfo, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -82,14 +95,10 @@ func findPath(location string, outputPathPattern string, dir bool) (out string, 
 			return nil
 		}
 
-		if out != "" {
-			err = fmt.Errorf("%s\nmultiple artifacts found for pattern \"%s\": %s", err, outputPathPattern, path)
-		}
-
-		out = path
+		out = append(out, path)
 		return nil
 	})
-	if out == "" && err == nil {
+	if len(out) == 0 && err == nil {
 		err = fmt.Errorf("couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern))
 	}
 	return
@@ -107,7 +116,7 @@ func (spec buildSpecification) build(params string) error {
 	buildCmd := command.New("flutter", append([]string{"build", spec.platformCmdFlag}, paramSlice...)...).SetStdout(os.Stdout)
 
 	if spec.platformCmdFlag == "ios" {
-		buildCmd.SetStdin(strings.NewReader("a"))
+		buildCmd.SetStdin(strings.NewReader("a")) // if the CLI asks to input the selected identity we force it to be aborted
 		errorWriter = io.MultiWriter(os.Stderr, &errBuffer)
 	}
 

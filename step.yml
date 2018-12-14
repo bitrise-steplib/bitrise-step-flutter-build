@@ -7,6 +7,8 @@ support_url: https://github.com/bitrise-steplib/bitrise-step-flutter-build/issue
 
 type_tags:
   - build
+project_type_tags:
+  - flutter
 
 is_requires_admin_user: true
 is_always_run: false

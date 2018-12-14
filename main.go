@@ -27,6 +27,7 @@ type config struct {
 	IOSExportPattern        string `env:"ios_output_pattern"`
 	AndroidExportPattern    string `env:"android_output_pattern"`
 	IOSCodesignIdentity     string `env:"ios_codesign_identity"`
+	ProjectLocation         string `env:"project_location,dir"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -126,6 +127,8 @@ build:
 		if !spec.buildable(cfg.Platform) {
 			continue
 		}
+
+		spec.projectLocation = cfg.ProjectLocation
 
 		fmt.Println()
 		log.Infof("Build " + spec.displayName)

@@ -19,6 +19,12 @@ toolkit:
     package_name: github.com/bitrise-steplib/bitrise-step-flutter-build
 
 inputs:
+  - project_location: "$BITRISE_SOURCE_DIR"
+    opts:
+      title: "Project Location"
+      summary: "The root dir of your Flutter project."
+      description: "The root dir of your Flutter project."
+      is_required: true
   - platform: both
     opts:
       title: "Platform"

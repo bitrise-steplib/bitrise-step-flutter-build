@@ -18,14 +18,6 @@ import (
 	glob "github.com/ryanuber/go-glob"
 )
 
-type warning struct {
-	s string
-}
-
-func (w warning) Error() string {
-	return w.s
-}
-
 type buildSpecification struct {
 	displayName          string
 	platformCmdFlag      string
@@ -40,7 +32,7 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 	switch spec.platformCmdFlag {
 	case "apk":
 		path, err := findPath(location, outputPathPattern, false)
-		if err != nil {
+		if err != nil && path == "" {
 			return err
 		}
 
@@ -51,10 +43,10 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 		}
 		log.Donef("- $BITRISE_APK_PATH: " + deployedFilePath)
 
-		return nil
+		return err
 	case "ios":
 		path, err := findPath(location, outputPathPattern, true)
-		if err != nil {
+		if err != nil && path == "" {
 			return err
 		}
 
@@ -70,9 +62,9 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 		}
 		log.Donef("- $BITRISE_APP_DIR_PATH: " + path)
 
-		return nil
+		return err
 	default:
-		return warning{"unsupported platform for exporting artifacts"}
+		return fmt.Errorf("unsupported platform for exporting artifacts")
 	}
 }
 
@@ -81,20 +73,24 @@ func (spec buildSpecification) buildable(platform string) bool {
 }
 
 func findPath(location string, outputPathPattern string, dir bool) (out string, err error) {
-	err = filepath.Walk(location, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+	err = filepath.Walk(location, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
 		}
 
 		if !info.IsDir() == dir || !glob.Glob(outputPathPattern, path) {
 			return nil
 		}
 
+		if out != "" {
+			err = fmt.Errorf("%s\nmultiple artifacts found for pattern \"%s\": %s", err, outputPathPattern, path)
+		}
+
 		out = path
 		return nil
 	})
 	if out == "" && err == nil {
-		err = warning{"couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern)}
+		err = fmt.Errorf("couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern))
 	}
 	return
 }

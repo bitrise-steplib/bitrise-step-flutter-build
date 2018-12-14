@@ -55,6 +55,10 @@ func main() {
 			log.Printf(" - %s", identity)
 		}
 
+		if len(installedCertificates) == 0 {
+			failf(" - No codesign identities installed")
+		}
+
 		var flutterSettings map[string]string
 		flutterSettingsExists, err := pathutil.IsPathExists(flutterConfigPath)
 		if err != nil {
@@ -142,12 +146,7 @@ build:
 		log.Infof("Export " + spec.displayName + " artifact")
 
 		if err := spec.exportArtifacts(spec.outputPathPattern); err != nil {
-			switch err.(type) {
-			case warning:
-				log.Warnf("Failed to export %s artifacts, warning: %s", spec.displayName, err)
-			default:
-				failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
-			}
+			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
 	}
 }

@@ -27,7 +27,7 @@ type config struct {
 	IOSExportPattern        string `env:"ios_output_pattern"`
 	AndroidExportPattern    string `env:"android_output_pattern"`
 	IOSCodesignIdentity     string `env:"ios_codesign_identity"`
-	ProjectLocation         string `env:"project_location,required"`
+	ProjectLocation         string `env:"project_location,dir"`
 }
 
 func failf(msg string, args ...interface{}) {

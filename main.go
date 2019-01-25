@@ -13,9 +13,13 @@ import (
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-xcode/certificateutil"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
-const defaultFlutterSettingsCodesignField = "ios-signing-cert"
+const (
+	defaultFlutterSettingsCodesignField    = "ios-signing-cert"
+	defaultFlutterIosNoCodesignCommandFlag = "--no-codesign"
+)
 
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
 var errCodeSign = errors.New("CODESIGN")
@@ -45,6 +49,15 @@ func main() {
 	if cfg.Platform == "ios" || cfg.Platform == "both" {
 		fmt.Println()
 		log.Infof("iOS Codesign settings")
+
+		iosParams, err := shellquote.Split(cfg.IOSAdditionalParams)
+		if err != nil {
+			failf(" - Failed to get iOS additional parameters, error: %s", err)
+		}
+		if sliceutil.IsStringInSlice(defaultFlutterIosNoCodesignCommandFlag, iosParams) {
+			log.Printf(" - Skipping codesign preparation, %s parameter set", defaultFlutterIosNoCodesignCommandFlag)
+			goto build
+		}
 
 		log.Printf(" Installed codesign identities:")
 		installedCertificates, err := certificateutil.InstalledCodesigningCertificateNames()

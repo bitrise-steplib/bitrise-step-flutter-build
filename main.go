@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	defaultFlutterSettingsCodesignField    = "ios-signing-cert"
-	defaultFlutterIosNoCodesignCommandFlag = "--no-codesign"
+	codesignField  = "ios-signing-cert"
+	noCodesignFlag = "--no-codesign"
 )
 
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
@@ -54,8 +54,8 @@ func main() {
 		if err != nil {
 			failf(" - Failed to get iOS additional parameters, error: %s", err)
 		}
-		if sliceutil.IsStringInSlice(defaultFlutterIosNoCodesignCommandFlag, iosParams) {
-			log.Printf(" - Skipping codesign preparation, %s parameter set", defaultFlutterIosNoCodesignCommandFlag)
+		if sliceutil.IsStringInSlice(noCodesignFlag, iosParams) {
+			log.Printf(" - Skipping codesign preparation, %s parameter set", noCodesignFlag)
 			goto build
 		}
 
@@ -95,7 +95,7 @@ func main() {
 			if !sliceutil.IsStringInSlice(cfg.IOSCodesignIdentity, installedCertificates) {
 				failf(" - The selected identity \"%s\" is not installed on the system", cfg.IOSCodesignIdentity)
 			}
-			flutterSettings[defaultFlutterSettingsCodesignField] = cfg.IOSCodesignIdentity
+			flutterSettings[codesignField] = cfg.IOSCodesignIdentity
 			newSettingsContent, err := json.MarshalIndent(flutterSettings, "", " ")
 			if err != nil {
 				failf(" - Failed to unmarshal .flutter_settings file, error: %s", err)

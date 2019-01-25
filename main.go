@@ -13,9 +13,13 @@ import (
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-xcode/certificateutil"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
-const defaultFlutterSettingsCodesignField = "ios-signing-cert"
+const (
+	codesignField  = "ios-signing-cert"
+	noCodesignFlag = "--no-codesign"
+)
 
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
 var errCodeSign = errors.New("CODESIGN")
@@ -45,6 +49,15 @@ func main() {
 	if cfg.Platform == "ios" || cfg.Platform == "both" {
 		fmt.Println()
 		log.Infof("iOS Codesign settings")
+
+		iosParams, err := shellquote.Split(cfg.IOSAdditionalParams)
+		if err != nil {
+			failf(" - Failed to get iOS additional parameters, error: %s", err)
+		}
+		if sliceutil.IsStringInSlice(noCodesignFlag, iosParams) {
+			log.Printf(" - Skipping codesign preparation, %s parameter set", noCodesignFlag)
+			goto build
+		}
 
 		log.Printf(" Installed codesign identities:")
 		installedCertificates, err := certificateutil.InstalledCodesigningCertificateNames()
@@ -82,7 +95,7 @@ func main() {
 			if !sliceutil.IsStringInSlice(cfg.IOSCodesignIdentity, installedCertificates) {
 				failf(" - The selected identity \"%s\" is not installed on the system", cfg.IOSCodesignIdentity)
 			}
-			flutterSettings[defaultFlutterSettingsCodesignField] = cfg.IOSCodesignIdentity
+			flutterSettings[codesignField] = cfg.IOSCodesignIdentity
 			newSettingsContent, err := json.MarshalIndent(flutterSettings, "", " ")
 			if err != nil {
 				failf(" - Failed to unmarshal .flutter_settings file, error: %s", err)

@@ -3,7 +3,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:454f7f6fcec51499ec9cb51c571ee30fddd21e7a472f85e83094c86a364ee316"
+  digest = "1:e935dd82be8de69ef50d583046102f272ffd4060c3a15c0bf4a885450de42d12"
+  name = "github.com/bitrise-io/go-steputils"
+  packages = [
+    "cache",
+    "tools",
+  ]
+  pruneopts = "UT"
+  revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7f7f7706f8dcb06f5d7933f1fbe959f057852f726f19fb8382987ce008105bd3"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -20,11 +31,19 @@
     "ziputil",
   ]
   pruneopts = "UT"
-  revision = "2a09aab8380d7842750328aebd5671bcccea89c8"
+  revision = "7a4402b387ebcdf3e2a0aa3b18d4c8636768f9a0"
+
+[[projects]]
+  digest = "1:b9f0bdb1388e9bbc02528cc8da58f3c4baef85ffa7e4c5f68f5c418117dea266"
+  name = "github.com/bitrise-steplib/bitrise-step-android-unit-test"
+  packages = ["cache"]
+  pruneopts = "UT"
+  revision = "dd2535d711f8515202beb3f02ef43c9b2c268b5b"
+  version = "0.11.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:3228c428b77aeec44a0f6caba1fc38c117dfe08b0c0a63b41f9766e288715fbc"
+  digest = "1:9ba98b0c13d8ae90c4b217056cef74b8aeab89e41cd7917a18e23798b6e8c4b0"
   name = "github.com/bitrise-tools/go-steputils"
   packages = [
     "output",
@@ -32,7 +51,7 @@
     "tools",
   ]
   pruneopts = "UT"
-  revision = "ec226b2359fcd806be64f0ad2217d8e741a1ff11"
+  revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
 
 [[projects]]
   branch = "master"
@@ -40,7 +59,7 @@
   name = "github.com/bitrise-tools/go-xcode"
   packages = ["certificateutil"]
   pruneopts = "UT"
-  revision = "8e44ecb550c0cadef602edda92e5c10476dd5daa"
+  revision = "c1544b4453f2869335f71fb53c0360bdb91d01b4"
 
 [[projects]]
   branch = "master"
@@ -70,12 +89,14 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/bitrise-io/go-steputils/cache",
     "github.com/bitrise-io/go-utils/command",
     "github.com/bitrise-io/go-utils/fileutil",
     "github.com/bitrise-io/go-utils/log",
     "github.com/bitrise-io/go-utils/pathutil",
     "github.com/bitrise-io/go-utils/sliceutil",
     "github.com/bitrise-io/go-utils/ziputil",
+    "github.com/bitrise-steplib/bitrise-step-android-unit-test/cache",
     "github.com/bitrise-tools/go-steputils/output",
     "github.com/bitrise-tools/go-steputils/stepconf",
     "github.com/bitrise-tools/go-steputils/tools",

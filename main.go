@@ -164,4 +164,23 @@ build:
 			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
 	}
+
+	fmt.Println()
+	log.Infof("Collecting cache")
+
+	if err := cacheCocoapodsDeps(cfg.ProjectLocation); err != nil {
+		log.Warnf("Failed to collect cocoapods cache")
+	}
+
+	if err := cacheCarthageDeps(cfg.ProjectLocation); err != nil {
+		log.Warnf("Failed to collect carthage cache")
+	}
+
+	if err := cacheAndroidDeps(cfg.ProjectLocation); err != nil {
+		log.Warnf("Failed to collect android cache")
+	}
+
+	if err := cacheFlutterDeps(cfg.ProjectLocation); err != nil {
+		log.Warnf("Failed to collect flutter cache")
+	}
 }

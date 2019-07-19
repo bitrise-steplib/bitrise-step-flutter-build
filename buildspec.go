@@ -46,7 +46,7 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 			deployedApks = append(deployedApks, deployedFilePath)
 		}
 		if err := tools.ExportEnvironmentWithEnvman("BITRISE_APK_PATH_LIST", strings.Join(deployedApks, "\n")); err != nil {
-
+			return fmt.Errorf("failed to export BITRISE_APK_PATH_LIST enviroment variable, error: %s", err)
 		}
 
 		log.Donef("- $BITRISE_APK_PATH: " + deployedApks[len(deployedApks)-1])

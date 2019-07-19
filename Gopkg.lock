@@ -3,18 +3,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e935dd82be8de69ef50d583046102f272ffd4060c3a15c0bf4a885450de42d12"
+  digest = "1:777a3395f3a6caee566d748410e0f6cd08814abe7c2f663d10b7dd868379e02c"
   name = "github.com/bitrise-io/go-steputils"
   packages = [
     "cache",
+    "stepconf",
     "tools",
   ]
   pruneopts = "UT"
-  revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
+  revision = "7c9aaee1af9593773b253b04dbcefbb1f527f184"
 
 [[projects]]
   branch = "master"
-  digest = "1:7f7f7706f8dcb06f5d7933f1fbe959f057852f726f19fb8382987ce008105bd3"
+  digest = "1:be5de67e04bfc62f7767debcef86676d49a1f1088dc6fdeff2eca2541ddf99f2"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -31,35 +32,34 @@
     "ziputil",
   ]
   pruneopts = "UT"
-  revision = "7a4402b387ebcdf3e2a0aa3b18d4c8636768f9a0"
+  revision = "cb35044c1bab53fdbfa1e6ea3b56478c25275c9c"
 
 [[projects]]
+  branch = "master"
+  digest = "1:0da8d1e78f162f482a17edc5a5ed1c97130eef9e584773dd01f32984d15c9de5"
+  name = "github.com/bitrise-io/go-xcode"
+  packages = ["certificateutil"]
+  pruneopts = "UT"
+  revision = "07ccf582b6b1afa2c33e133447a3e22c811ffd90"
+
+[[projects]]
+  branch = "master"
   digest = "1:b9f0bdb1388e9bbc02528cc8da58f3c4baef85ffa7e4c5f68f5c418117dea266"
   name = "github.com/bitrise-steplib/bitrise-step-android-unit-test"
   packages = ["cache"]
   pruneopts = "UT"
   revision = "dd2535d711f8515202beb3f02ef43c9b2c268b5b"
-  version = "0.11.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:9ba98b0c13d8ae90c4b217056cef74b8aeab89e41cd7917a18e23798b6e8c4b0"
+  digest = "1:3c699fd967d937513d4c8fb19fb6c7a0b5455ed0167cd25ddb6fcd049153381a"
   name = "github.com/bitrise-tools/go-steputils"
   packages = [
     "output",
-    "stepconf",
     "tools",
   ]
   pruneopts = "UT"
-  revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:e685326d1f4c14a4169e2f494abad32cc004c0dd8a953c9ee1c6962d346347b3"
-  name = "github.com/bitrise-tools/go-xcode"
-  packages = ["certificateutil"]
-  pruneopts = "UT"
-  revision = "c1544b4453f2869335f71fb53c0360bdb91d01b4"
+  revision = "7c9aaee1af9593773b253b04dbcefbb1f527f184"
 
 [[projects]]
   branch = "master"
@@ -70,12 +70,12 @@
   revision = "95032a82bc518f77982ea72343cc1ade730072f0"
 
 [[projects]]
-  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  branch = "master"
+  digest = "1:deff41c4160cc5b487a1d1a69a58925f2d3ac11befa0692b50e76940594e20f5"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
+  revision = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
 
 [[projects]]
   digest = "1:6baa565fe16f8657cf93469b2b8a6c61a277827734400d27e44d589547297279"
@@ -90,17 +90,17 @@
   analyzer-version = 1
   input-imports = [
     "github.com/bitrise-io/go-steputils/cache",
+    "github.com/bitrise-io/go-steputils/stepconf",
     "github.com/bitrise-io/go-utils/command",
     "github.com/bitrise-io/go-utils/fileutil",
     "github.com/bitrise-io/go-utils/log",
     "github.com/bitrise-io/go-utils/pathutil",
     "github.com/bitrise-io/go-utils/sliceutil",
     "github.com/bitrise-io/go-utils/ziputil",
+    "github.com/bitrise-io/go-xcode/certificateutil",
     "github.com/bitrise-steplib/bitrise-step-android-unit-test/cache",
     "github.com/bitrise-tools/go-steputils/output",
-    "github.com/bitrise-tools/go-steputils/stepconf",
     "github.com/bitrise-tools/go-steputils/tools",
-    "github.com/bitrise-tools/go-xcode/certificateutil",
     "github.com/kballard/go-shellquote",
     "github.com/ryanuber/go-glob",
   ]

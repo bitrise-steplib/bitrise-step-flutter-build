@@ -179,8 +179,4 @@ build:
 	if err := cacheAndroidDeps(cfg.ProjectLocation); err != nil {
 		log.Warnf("Failed to collect android cache")
 	}
-
-	if err := cacheFlutterDeps(cfg.ProjectLocation); err != nil {
-		log.Warnf("Failed to collect flutter cache")
-	}
 }

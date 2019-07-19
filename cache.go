@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/bitrise-io/go-steputils/cache"
@@ -52,4 +53,24 @@ func cacheAndroidDeps(projectDir string) error {
 	}
 
 	return androidCache.Collect(androidDir, androidCache.LevelDeps)
+}
+
+func cacheFlutterDeps(projectDir string) error {
+	flutterBinPth, err := exec.LookPath("flutter")
+	if err != nil {
+		return err
+	}
+
+	flutterSDKPth := filepath.Dir(filepath.Dir(flutterBinPth))
+
+	pubspecLockPth := filepath.Join(projectDir, "pubspec.lock")
+	if exist, err := pathutil.IsPathExists(pubspecLockPth); err != nil {
+		return err
+	} else if !exist {
+		return nil
+	}
+
+	pubCache := cache.New()
+	pubCache.IncludePath(fmt.Sprintf("%s -> %s", filepath.Join(flutterSDKPth, ".pub-cache"), pubspecLockPth))
+	return pubCache.Commit()
 }

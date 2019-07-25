@@ -13,7 +13,7 @@ import (
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-xcode/certificateutil"
-	shellquote "github.com/kballard/go-shellquote"
+	"github.com/kballard/go-shellquote"
 )
 
 const (
@@ -25,13 +25,15 @@ var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
 var errCodeSign = errors.New("CODESIGN")
 
 type config struct {
-	IOSAdditionalParams     string `env:"ios_additional_params"`
-	AndroidAdditionalParams string `env:"android_additional_params"`
-	Platform                string `env:"platform,opt[both,ios,android]"`
-	IOSExportPattern        string `env:"ios_output_pattern"`
-	AndroidExportPattern    string `env:"android_output_pattern"`
-	IOSCodesignIdentity     string `env:"ios_codesign_identity"`
-	ProjectLocation         string `env:"project_location,dir"`
+	IOSAdditionalParams        string `env:"ios_additional_params"`
+	AndroidAdditionalParams    string `env:"android_additional_params"`
+	Platform                   string `env:"platform,opt[both,ios,android]"`
+	IOSExportPattern           string `env:"ios_output_pattern"`
+	AndroidOutputType          string `env:"android_output_type,opt[apk,appbundle]"`
+	AndroidExportPattern       string `env:"android_output_pattern"`
+	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
+	IOSCodesignIdentity        string `env:"ios_codesign_identity"`
+	ProjectLocation            string `env:"project_location,dir"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -122,18 +124,18 @@ func main() {
 build:
 
 	for _, spec := range []buildSpecification{
-		buildSpecification{
+		{
 			displayName:          "iOS",
 			platformCmdFlag:      "ios",
 			platformSelectors:    []string{"both", "ios"},
 			outputPathPattern:    cfg.IOSExportPattern,
 			additionalParameters: cfg.IOSAdditionalParams,
 		},
-		buildSpecification{
+		{
 			displayName:          "Android",
-			platformCmdFlag:      "apk",
+			platformCmdFlag:      cfg.AndroidOutputType,
 			platformSelectors:    []string{"both", "android"},
-			outputPathPattern:    cfg.AndroidExportPattern,
+			outputPathPattern:    cfg.getAndroidOutputPathPattern(),
 			additionalParameters: cfg.AndroidAdditionalParams,
 		},
 	} {
@@ -163,5 +165,15 @@ build:
 		if err := spec.exportArtifacts(spec.outputPathPattern); err != nil {
 			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
+	}
+}
+
+func (cfg config) getAndroidOutputPathPattern() string {
+	switch cfg.AndroidOutputType {
+	case "appbundle":
+		return cfg.AndroidBundleExportPattern
+	default:
+		return cfg.AndroidExportPattern
+
 	}
 }

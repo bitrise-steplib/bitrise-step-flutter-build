@@ -53,6 +53,16 @@ inputs:
       title: "Output pattern"
       summary: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
       description: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
+  - android_output_type: "apk"
+    opts:
+      category: "Android Platform Configs"
+      title: "Android output artifact type"
+      summary: "The selected output type will be build, either APK or app bundle (AAB)"
+      description: "The selected output type will be build, either APK or app bundle (AAB)"
+      is_required: true
+      value_options:
+        - "apk"
+        - "appbundle"
   - android_additional_params: "--release"
     opts:
       category: "Android Platform Configs"
@@ -62,10 +72,15 @@ inputs:
   - android_output_pattern: "*build/app/outputs/apk/*/*.apk"
     opts:
       category: "Android Platform Configs"
-      title: "Output pattern"
-      summary: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
-      description: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
-
+      title: "APK output pattern"
+      summary: "Pattern to find built APK artifacts relative to $BITRISE_SOURCE_DIR"
+      description: "Pattern to find built APK artifacts relative to $BITRISE_SOURCE_DIR"
+  - android_bundle_output_pattern: "*build/app/outputs/bundle/*/*.aab"
+    opts:
+      category: "Android Platform Configs"
+      title: "App bundle output pattern"
+      summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
+      description: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
 
 outputs:
   - BITRISE_APK_PATH:
@@ -77,3 +92,20 @@ outputs:
   - BITRISE_APP_DIR_PATH:
     opts:
       title: The generated .app directory
+  - BITRISE_AAB_PATH_LIST:
+    opts:
+      title: "List of the generated AAB file paths"
+      summary: "List of the generated (and copied) AAB file paths - after filtering."
+      description: |-
+        This output will include the paths of the generated AAB files,
+        after filtering based on the filter inputs.
+        The paths are separated with `|` character, eg: `app.aab|app2.aab`
+  - BITRISE_AAB_PATH:
+    opts:
+      title: "Path of the generated AAB"
+      summary: "Path of the generated (and copied) AAB file - after filtering."
+      description: |-
+        This output will include the path of the generated AAB file,
+        after filtering based on the filter inputs.
+        If the build generates more than one AAB file which fulfills the
+        filter inputs this output will contain the last one's path.

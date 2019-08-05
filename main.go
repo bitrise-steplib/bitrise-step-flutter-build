@@ -46,6 +46,15 @@ func main() {
 	}
 	stepconf.Print(cfg)
 
+	projectLocationAbs, err := filepath.Abs(cfg.ProjectLocation)
+	if err != nil {
+		failf("Failed to get absolute project path, error: %s", err)
+	}
+
+	if _, err := os.Stat(projectLocationAbs); err != nil && os.IsNotExist(err) {
+		failf("Project path does not exist.")
+	}
+
 	if cfg.Platform == "ios" || cfg.Platform == "both" {
 		fmt.Println()
 		log.Infof("iOS Codesign settings")
@@ -141,7 +150,7 @@ build:
 			continue
 		}
 
-		spec.projectLocation = cfg.ProjectLocation
+		spec.projectLocation = projectLocationAbs
 
 		fmt.Println()
 		log.Infof("Build " + spec.displayName)
@@ -168,19 +177,19 @@ build:
 	fmt.Println()
 	log.Infof("Collecting cache")
 
-	if err := cacheCocoapodsDeps(cfg.ProjectLocation); err != nil {
+	if err := cacheCocoapodsDeps(projectLocationAbs); err != nil {
 		log.Warnf("Failed to collect cocoapods cache")
 	}
 
-	if err := cacheCarthageDeps(cfg.ProjectLocation); err != nil {
+	if err := cacheCarthageDeps(projectLocationAbs); err != nil {
 		log.Warnf("Failed to collect carthage cache")
 	}
 
-	if err := cacheAndroidDeps(cfg.ProjectLocation); err != nil {
+	if err := cacheAndroidDeps(projectLocationAbs); err != nil {
 		log.Warnf("Failed to collect android cache")
 	}
 
-	if err := cacheFlutterDeps(cfg.ProjectLocation); err != nil {
+	if err := cacheFlutterDeps(projectLocationAbs); err != nil {
 		log.Warnf("Failed to collect flutter cache")
 	}
 }

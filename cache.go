@@ -64,6 +64,7 @@ func cacheFlutterDeps(projectDir string) error {
 	flutterSDKPth := filepath.Dir(filepath.Dir(flutterBinPth))
 
 	pubspecLockPth := filepath.Join(projectDir, "pubspec.lock")
+
 	if exist, err := pathutil.IsPathExists(pubspecLockPth); err != nil {
 		return err
 	} else if !exist {

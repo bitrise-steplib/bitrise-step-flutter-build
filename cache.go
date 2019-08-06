@@ -11,6 +11,7 @@ import (
 	"github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-utils/sliceutil"
 	androidCache "github.com/bitrise-steplib/bitrise-step-android-unit-test/cache"
 )
 
@@ -128,28 +129,33 @@ func cacheFlutterDeps(projectDir string) error {
 		return fmt.Errorf("failed to parse Flutter package resolution file, error: %s", err)
 	}
 
-	// package locations are relative to the package resolution file
-	undoChangeDir, err := pathutil.RevokableChangeDir(projectDir)
-	if err != nil {
-		return fmt.Errorf("failed to change directory, error: %s", err)
-	}
-
 	var cachePaths []string
 	for _, location := range packageToLocation {
 		if location.Scheme != "file" && location.Scheme != "" {
+			log.Debugf("Flutter dependency cache: ignoring non-file scheme package: %s", location.Path)
 			continue
 		}
 
-		absPath, err := filepath.Abs(location.Path)
-		if err != nil {
-			return fmt.Errorf("failed to get absolute path for: %s, error: %s", location.Path, err)
+		// Only care about absolute paths
+		if !filepath.IsAbs(location.Path) {
+			log.Debugf("Flutter dependency cache:: ignoring relative package: %s", location.Path)
+			continue
 		}
 
-		cachePaths = append(cachePaths, absPath)
-	}
+		pathElements := filepath.SplitList(location.Path)
 
-	if err := undoChangeDir(); err != nil {
-		return fmt.Errorf("failed to change directory, error: %s", err)
+		if !sliceutil.IsStringInSlice(".pub-cache", pathElements) {
+			log.Debugf("Flutter dependency cache: package not in system dependency cache: %s", location.Path)
+			continue
+		}
+
+		// https://dart.dev/guides/libraries/create-library-packages
+		if pathElements[len(pathElements)-1] != "lib" {
+			log.Warnf("Flutter dependency cache: package path does not have top level 'lib' element: %s", location.Path)
+			continue
+		}
+
+		cachePaths = append(cachePaths, filepath.Dir(location.Path))
 	}
 
 	log.Debugf("Marking Flutter dependency paths to be cached: %s", cachePaths)

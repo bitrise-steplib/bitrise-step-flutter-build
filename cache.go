@@ -65,7 +65,7 @@ func cacheAndroidDeps(projectDir string) error {
 }
 
 func openPackageResolutionFile(projectDir string) (string, error) {
-	resolutionFilePath := filepath.Join(projectDir, ".package")
+	resolutionFilePath := filepath.Join(projectDir, ".packages")
 
 	if _, err := os.Stat(resolutionFilePath); os.IsNotExist(err) {
 		return "", fmt.Errorf("package resolution file (%s) not found, error: %s", resolutionFilePath, err)

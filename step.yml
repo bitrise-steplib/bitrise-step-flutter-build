@@ -65,6 +65,14 @@ inputs:
       title: "Output pattern"
       summary: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
       description: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
+  - verbose: "false"
+    opts:
+      title: "Enable verbose log?"
+      description: |-
+        You can enable the verbose log for easier debugging.
+      value_options:
+        - "true"
+        - "false"
 
 
 outputs:

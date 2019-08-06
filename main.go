@@ -32,6 +32,7 @@ type config struct {
 	AndroidExportPattern    string `env:"android_output_pattern"`
 	IOSCodesignIdentity     string `env:"ios_codesign_identity"`
 	ProjectLocation         string `env:"project_location,dir"`
+	IsVerbose               bool   `env:"verbose,opt[true,false]"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -45,6 +46,7 @@ func main() {
 		failf("Issue with input: %s", err)
 	}
 	stepconf.Print(cfg)
+	log.SetEnableDebugLog(cfg.IsVerbose)
 
 	projectLocationAbs, err := filepath.Abs(cfg.ProjectLocation)
 	if err != nil {

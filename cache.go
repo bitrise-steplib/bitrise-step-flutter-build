@@ -128,10 +128,10 @@ func cacheFlutterDeps(projectDir string) error {
 		return fmt.Errorf("failed to parse Flutter package resolution file, error: %s", err)
 	}
 
-	// package lcoations are relatice to the package resolution file
+	// package locations are relative to the package resolution file
 	undoChangeDir, err := pathutil.RevokableChangeDir(projectDir)
 	if err != nil {
-		return fmt.Errorf("failed to cahnge directory, error: %s", err)
+		return fmt.Errorf("failed to change directory, error: %s", err)
 	}
 
 	var cachePaths []string

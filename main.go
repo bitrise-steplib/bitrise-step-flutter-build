@@ -183,18 +183,18 @@ build:
 	log.Infof("Collecting cache")
 
 	if err := cacheCocoapodsDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect cocoapods cache")
+		log.Warnf("Failed to collect cocoapods cache, error: %s", err)
 	}
 
 	if err := cacheCarthageDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect carthage cache")
+		log.Warnf("Failed to collect carthage cache, error: %s", err)
 	}
 
 	if err := cacheAndroidDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect android cache")
+		log.Warnf("Failed to collect android cache, error: %s", err)
 	}
 
 	if err := cacheFlutterDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect flutter cache")
+		log.Warnf("Failed to collect flutter cache, error: %s", err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -22,27 +23,29 @@ type buildSpecification struct {
 	displayName          string
 	platformCmdFlag      string
 	platformSelectors    []string
-	outputPathPattern    string
+	outputPathPatterns   []string
 	additionalParameters string
 	projectLocation      string
 }
 
-func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
+func (spec buildSpecification) exportArtifacts(outputPathPatterns []string, androidOutputType AndroidArtifactType) error {
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
 	switch spec.platformCmdFlag {
-	case "apk":
-		fallthrough
-	case "appbundle":
-		return spec.exportAndroidArtifacts(outputPathPattern, deployDir)
+	case "apk", "appbundle":
+		return spec.exportAndroidArtifacts(androidOutputType, outputPathPatterns, deployDir)
 	case "ios":
-		paths, err := findPaths(spec.projectLocation, outputPathPattern, true)
-		if err != nil {
-			return err
+		var paths []string
+		for _, outputPathPattern := range outputPathPatterns {
+			pths, err := findPaths(spec.projectLocation, outputPathPattern, true)
+			if err != nil {
+				return err
+			}
+			paths = append(paths, pths...)
 		}
 
 		path := paths[len(paths)-1]
 		if len(paths) > 1 {
-			log.Warnf("- Multiple artifacts found for pattern \"%s\": %v, exporting %s", outputPathPattern, paths, path)
+			log.Warnf("- Multiple artifacts found for pattern \"%s\": %v, exporting %s", outputPathPatterns, paths, path)
 		}
 
 		fileName := filepath.Base(path)
@@ -63,11 +66,16 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 	}
 }
 
-func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, deployDir string) error {
-	paths, err := findPaths(spec.projectLocation, outputPathPattern, false)
-	if err != nil {
-		return err
+func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, outputPathPatterns []string, deployDir string) error {
+	var paths []string
+	for _, outputPathPattern := range outputPathPatterns {
+		pths, err := findPaths(spec.projectLocation, outputPathPattern, false)
+		if err != nil {
+			return err
+		}
+		paths = append(paths, pths...)
 	}
+	paths = filterAndroidArtifactsBy(androidOutputType, paths)
 
 	var singleFileOutputEnvName string
 	var multipleFileOutputEnvName string
@@ -90,12 +98,31 @@ func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, 
 		deployedFiles = append(deployedFiles, deployedFilePath)
 	}
 	if err := tools.ExportEnvironmentWithEnvman(multipleFileOutputEnvName, strings.Join(deployedFiles, "\n")); err != nil {
-
+		return err
 	}
 
 	log.Donef("- " + singleFileOutputEnvName + ": " + deployedFiles[len(deployedFiles)-1])
 	log.Donef("- " + multipleFileOutputEnvName + ": " + strings.Join(deployedFiles, "|"))
 	return nil
+}
+
+func filterAndroidArtifactsBy(androidOutputType AndroidArtifactType, artifacts []string) []string {
+	var index int
+	for _, artifact := range artifacts {
+		switch androidOutputType {
+		case APK:
+			if path.Ext(artifact) != ".apk" {
+				continue // drop artifact
+			}
+		case AppBundle:
+			if path.Ext(artifact) != ".aab" {
+				continue // drop artifact
+			}
+		}
+		artifacts[index] = artifact
+		index++
+	}
+	return artifacts[:index]
 }
 
 func (spec buildSpecification) buildable(platform string) bool {
@@ -116,7 +143,7 @@ func findPaths(location string, outputPathPattern string, dir bool) (out []strin
 		return nil
 	})
 	if len(out) == 0 && err == nil {
-		err = fmt.Errorf("couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern))
+		log.Debugf("couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern))
 	}
 	return
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
@@ -21,19 +22,29 @@ const (
 	noCodesignFlag = "--no-codesign"
 )
 
+// AndroidArtifactType is an enum
+// **APK** or **AppBundle**
+type AndroidArtifactType string
+
+// const ...
+const (
+	APK       = "apk"
+	AppBundle = "appbundle"
+)
+
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
 var errCodeSign = errors.New("CODESIGN")
 
 type config struct {
-	IOSAdditionalParams        string `env:"ios_additional_params"`
-	AndroidAdditionalParams    string `env:"android_additional_params"`
-	Platform                   string `env:"platform,opt[both,ios,android]"`
-	IOSExportPattern           string `env:"ios_output_pattern"`
-	AndroidOutputType          string `env:"android_output_type,opt[apk,appbundle]"`
-	AndroidExportPattern       string `env:"android_output_pattern"`
-	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
-	IOSCodesignIdentity        string `env:"ios_codesign_identity"`
-	ProjectLocation            string `env:"project_location,dir"`
+	IOSAdditionalParams     string              `env:"ios_additional_params"`
+	AndroidAdditionalParams string              `env:"android_additional_params"`
+	Platform                string              `env:"platform,opt[both,ios,android]"`
+	IOSExportPattern        string              `env:"ios_output_pattern"`
+	AndroidOutputType       AndroidArtifactType `env:"android_output_type,opt[apk,appbundle]"`
+	AndroidExportPattern    string              `env:"android_output_pattern"`
+	IOSCodesignIdentity     string              `env:"ios_codesign_identity"`
+	ProjectLocation         string              `env:"project_location,dir"`
+	DebugMode               bool                `env:"is_debug_mode,opt[true,false]"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -47,6 +58,7 @@ func main() {
 		failf("Issue with input: %s", err)
 	}
 	stepconf.Print(cfg)
+	log.SetEnableDebugLog(cfg.DebugMode)
 
 	if cfg.Platform == "ios" || cfg.Platform == "both" {
 		fmt.Println()
@@ -128,14 +140,14 @@ build:
 			displayName:          "iOS",
 			platformCmdFlag:      "ios",
 			platformSelectors:    []string{"both", "ios"},
-			outputPathPattern:    cfg.IOSExportPattern,
+			outputPathPatterns:   append(strings.Split(cfg.IOSExportPattern, "\n")),
 			additionalParameters: cfg.IOSAdditionalParams,
 		},
 		{
 			displayName:          "Android",
-			platformCmdFlag:      cfg.AndroidOutputType,
+			platformCmdFlag:      string(cfg.AndroidOutputType),
 			platformSelectors:    []string{"both", "android"},
-			outputPathPattern:    cfg.getAndroidOutputPathPattern(),
+			outputPathPatterns:   append(strings.Split(cfg.AndroidExportPattern, "\n")),
 			additionalParameters: cfg.AndroidAdditionalParams,
 		},
 	} {
@@ -162,18 +174,8 @@ build:
 		fmt.Println()
 		log.Infof("Export " + spec.displayName + " artifact")
 
-		if err := spec.exportArtifacts(spec.outputPathPattern); err != nil {
+		if err := spec.exportArtifacts(spec.outputPathPatterns, cfg.AndroidOutputType); err != nil {
 			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
-	}
-}
-
-func (cfg config) getAndroidOutputPathPattern() string {
-	switch cfg.AndroidOutputType {
-	case "appbundle":
-		return cfg.AndroidBundleExportPattern
-	default:
-		return cfg.AndroidExportPattern
-
 	}
 }

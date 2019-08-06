@@ -51,7 +51,10 @@ func main() {
 		failf("Failed to get absolute project path, error: %s", err)
 	}
 
-	if _, err := os.Stat(projectLocationAbs); err != nil && os.IsNotExist(err) {
+	exist, err := pathutil.IsDirExists(projectLocationAbs)
+	if err != nil {
+		failf("Failed to check if project path exists, error: %s", err)
+	} else if !exist {
 		failf("Project path does not exist.")
 	}
 

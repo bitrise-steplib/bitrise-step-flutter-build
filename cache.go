@@ -118,18 +118,9 @@ func parsePackageResolutionFile(contents string) (map[string]url.URL, error) {
 	return packageToLocation, nil
 }
 
-func cacheFlutterDeps(projectDir string) error {
-	contents, err := openPackageResolutionFile(projectDir)
-	if err != nil {
-		return err
-	}
-
-	packageToLocation, err := parsePackageResolutionFile(contents)
-	if err != nil {
-		return fmt.Errorf("failed to parse Flutter package resolution file, error: %s", err)
-	}
-
+func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, error) {
 	var cachePaths []string
+
 	for _, location := range packageToLocation {
 		if location.Scheme != "file" && location.Scheme != "" {
 			log.Debugf("Flutter dependency cache: ignoring non-file scheme package: %s", location.Path)
@@ -142,7 +133,10 @@ func cacheFlutterDeps(projectDir string) error {
 			continue
 		}
 
-		pathElements := filepath.SplitList(location.Path)
+		sep := string(os.PathSeparator)
+		location.Path = strings.TrimSuffix(location.Path, sep)
+
+		pathElements := strings.Split(strings.TrimSuffix(location.Path, sep), sep)
 
 		if !sliceutil.IsStringInSlice(".pub-cache", pathElements) {
 			log.Debugf("Flutter dependency cache: package not in system dependency cache: %s", location.Path)
@@ -158,6 +152,24 @@ func cacheFlutterDeps(projectDir string) error {
 		cachePaths = append(cachePaths, filepath.Dir(location.Path))
 	}
 
+	return cachePaths, nil
+}
+
+func cacheFlutterDeps(projectDir string) error {
+	contents, err := openPackageResolutionFile(projectDir)
+	if err != nil {
+		return err
+	}
+
+	packageToLocation, err := parsePackageResolutionFile(contents)
+	if err != nil {
+		return fmt.Errorf("failed to parse Flutter package resolution file, error: %s", err)
+	}
+
+	cachePaths, err := cacheableFlutterDepPaths(packageToLocation)
+	if err != nil {
+		return err
+	}
 	log.Debugf("Marking Flutter dependency paths to be cached: %s", cachePaths)
 
 	pubCache := cache.New()

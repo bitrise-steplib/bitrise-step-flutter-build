@@ -19,7 +19,8 @@ workflows:
     - flutter-installer:
     after_run:
     - test_ios
-    - test_android
+    - test_android_apk
+    - test_android_aab
     - test_both
 
   ci-android-only:
@@ -32,8 +33,9 @@ workflows:
     - go-test:
     - flutter-installer:
     after_run:
-    - test_android
-    
+    - test_android_apk
+    - test_android_aab
+
   test_ios:
     before_run:
     - _clear_workdir
@@ -46,7 +48,7 @@ workflows:
         inputs: 
         - platform: ios
 
-  test_android:
+  test_android_apk:
     before_run:
     - _clear_workdir
     steps:
@@ -57,6 +59,19 @@ workflows:
     - path::./:
         inputs: 
         - platform: android
+
+  test_android_aab:
+    before_run:
+      - _clear_workdir
+    steps:
+      - script:
+          title: Clone sample app
+          inputs:
+            - content: git clone $SAMPLE_APP_URL .
+      - path::./:
+          inputs:
+            - platform: android
+            - android_output_type: appbundle
 
   test_both:
     before_run:

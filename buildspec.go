@@ -14,8 +14,8 @@ import (
 	"github.com/bitrise-io/go-utils/ziputil"
 	"github.com/bitrise-tools/go-steputils/output"
 	"github.com/bitrise-tools/go-steputils/tools"
-	shellquote "github.com/kballard/go-shellquote"
-	glob "github.com/ryanuber/go-glob"
+	"github.com/kballard/go-shellquote"
+	"github.com/ryanuber/go-glob"
 )
 
 type buildSpecification struct {
@@ -31,27 +31,9 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
 	switch spec.platformCmdFlag {
 	case "apk":
-		paths, err := findPaths(spec.projectLocation, outputPathPattern, false)
-		if err != nil {
-			return err
-		}
-
-		var deployedApks []string
-		for _, path := range paths {
-			deployedFilePath := filepath.Join(deployDir, filepath.Base(path))
-
-			if err := output.ExportOutputFile(path, deployedFilePath, "BITRISE_APK_PATH"); err != nil {
-				return err
-			}
-			deployedApks = append(deployedApks, deployedFilePath)
-		}
-		if err := tools.ExportEnvironmentWithEnvman("BITRISE_APK_PATH_LIST", strings.Join(deployedApks, "\n")); err != nil {
-			return fmt.Errorf("failed to export BITRISE_APK_PATH_LIST enviroment variable, error: %s", err)
-		}
-
-		log.Donef("- $BITRISE_APK_PATH: " + deployedApks[len(deployedApks)-1])
-		log.Donef("- $BITRISE_APK_PATH_LIST: " + strings.Join(deployedApks, "|"))
-		return nil
+		fallthrough
+	case "appbundle":
+		return spec.exportAndroidArtifacts(outputPathPattern, deployDir)
 	case "ios":
 		paths, err := findPaths(spec.projectLocation, outputPathPattern, true)
 		if err != nil {
@@ -79,6 +61,41 @@ func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
 	default:
 		return fmt.Errorf("unsupported platform for exporting artifacts")
 	}
+}
+
+func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, deployDir string) error {
+	paths, err := findPaths(spec.projectLocation, outputPathPattern, false)
+	if err != nil {
+		return err
+	}
+
+	var singleFileOutputEnvName string
+	var multipleFileOutputEnvName string
+	switch spec.platformCmdFlag {
+	case "appbundle":
+		singleFileOutputEnvName = "BITRISE_AAB_PATH"
+		multipleFileOutputEnvName = "BITRISE_AAB_PATH_LIST"
+	default:
+		singleFileOutputEnvName = "BITRISE_APK_PATH"
+		multipleFileOutputEnvName = "BITRISE_APK_PATH_LIST"
+	}
+
+	var deployedFiles []string
+	for _, path := range paths {
+		deployedFilePath := filepath.Join(deployDir, filepath.Base(path))
+
+		if err := output.ExportOutputFile(path, deployedFilePath, singleFileOutputEnvName); err != nil {
+			return err
+		}
+		deployedFiles = append(deployedFiles, deployedFilePath)
+	}
+	if err := tools.ExportEnvironmentWithEnvman(multipleFileOutputEnvName, strings.Join(deployedFiles, "\n")); err != nil {
+
+	}
+
+	log.Donef("- " + singleFileOutputEnvName + ": " + deployedFiles[len(deployedFiles)-1])
+	log.Donef("- " + multipleFileOutputEnvName + ": " + strings.Join(deployedFiles, "|"))
+	return nil
 }
 
 func (spec buildSpecification) buildable(platform string) bool {

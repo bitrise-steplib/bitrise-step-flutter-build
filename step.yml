@@ -64,7 +64,7 @@ inputs:
       title: "Output pattern"
       summary: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
       description: |-
-        Separate patters with a newline.
+        Separate patterns with a newline.
   - android_output_type: "apk"
     opts:
       category: "Android Platform Configs"
@@ -90,7 +90,7 @@ inputs:
       summary: "Pattern to find built APK or AAB artifacts relative to $BITRISE_SOURCE_DIR"
       description: |
         Will find the APK or AAB files - `depending on the build type input` - with the given pattern.<br/>
-        Separate patters with a newline.
+        Separate patterns with a newline.
         **Note**<br/>
         The step will export only the selected artifact type - `Android output artifact type` - even if the filter would accept other artifact types as well.
       is_required: true

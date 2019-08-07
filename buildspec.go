@@ -111,10 +111,12 @@ func filterAndroidArtifactsBy(androidOutputType AndroidArtifactType, artifacts [
 		switch androidOutputType {
 		case APK:
 			if path.Ext(artifact) != ".apk" {
+				log.Debugf("Arfifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
 				continue // drop artifact
 			}
 		case AppBundle:
 			if path.Ext(artifact) != ".aab" {
+				log.Debugf("Arfifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
 				continue // drop artifact
 			}
 		}

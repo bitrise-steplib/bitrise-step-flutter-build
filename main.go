@@ -174,7 +174,21 @@ build:
 		fmt.Println()
 		log.Infof("Export " + spec.displayName + " artifact")
 
-		if err := spec.exportArtifacts(spec.outputPathPatterns, cfg.AndroidOutputType); err != nil {
+		var artifacts []string
+		var err error
+		switch spec.platformCmdFlag {
+		case "apk", "appbundle":
+			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, false)
+		case "ios":
+			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, true)
+		default:
+			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, false)
+		}
+		if err != nil {
+			failf("failed to find artifacts, error: %s", err)
+		}
+
+		if err := spec.exportArtifacts(spec.outputPathPatterns, artifacts, cfg.AndroidOutputType); err != nil {
 			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
 	}

@@ -17,17 +17,15 @@ import (
 	"github.com/kballard/go-shellquote"
 )
 
-const (
-	codesignField  = "ios-signing-cert"
-	noCodesignFlag = "--no-codesign"
-)
-
 // AndroidArtifactType is an enum
 // **APK** or **AppBundle**
 type AndroidArtifactType string
 
 // const ...
 const (
+	codesignField  = "ios-signing-cert"
+	noCodesignFlag = "--no-codesign"
+
 	APK       = "apk"
 	AppBundle = "appbundle"
 )
@@ -39,9 +37,9 @@ type config struct {
 	IOSAdditionalParams     string              `env:"ios_additional_params"`
 	AndroidAdditionalParams string              `env:"android_additional_params"`
 	Platform                string              `env:"platform,opt[both,ios,android]"`
-	IOSExportPattern        string              `env:"ios_output_pattern"`
+	IOSExportPattern        string              `env:"ios_output_pattern,required"`
 	AndroidOutputType       AndroidArtifactType `env:"android_output_type,opt[apk,appbundle]"`
-	AndroidExportPattern    string              `env:"android_output_pattern"`
+	AndroidExportPattern    string              `env:"android_output_pattern,required"`
 	IOSCodesignIdentity     string              `env:"ios_codesign_identity"`
 	ProjectLocation         string              `env:"project_location,dir"`
 	DebugMode               bool                `env:"is_debug_mode,opt[true,false]"`

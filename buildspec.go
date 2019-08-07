@@ -36,7 +36,7 @@ func (spec buildSpecification) exportArtifacts(outputPathPatterns, artifacts []s
 	case "ios":
 		return spec.exportIOSArtifacts(outputPathPatterns, artifacts, deployDir)
 	default:
-		return fmt.Errorf("unsupported platform for exporting artifacts")
+		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbuundle, ios", spec.platformCmdFlag)
 	}
 }
 
@@ -55,7 +55,7 @@ func (spec buildSpecification) artifactPaths(outputPathPatterns []string, isDir 
 func (spec buildSpecification) exportIOSArtifacts(outputPathPatterns, artifacts []string, deployDir string) error {
 	artifact := artifacts[len(artifacts)-1]
 	if len(artifacts) > 1 {
-		log.Warnf("- Multiple artifacts found for pattern \"%s\": %v, exporting %s", outputPathPatterns, artifacts, artifact)
+		log.Warnf("- Multiple artifacts found for pattern \"%v\": %v, exporting %s", outputPathPatterns, artifacts, artifact)
 	}
 
 	fileName := filepath.Base(artifact)

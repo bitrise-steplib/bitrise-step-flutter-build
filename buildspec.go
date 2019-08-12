@@ -28,15 +28,17 @@ type buildSpecification struct {
 	projectLocation      string
 }
 
-func (spec buildSpecification) exportArtifacts(outputPathPatterns, artifacts []string, androidOutputType AndroidArtifactType) error {
+func (spec buildSpecification) exportArtifacts(artifacts []string) error {
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
 	switch spec.platformCmdFlag {
-	case "apk", "appbundle":
-		return spec.exportAndroidArtifacts(androidOutputType, outputPathPatterns, artifacts, deployDir)
+	case "apk":
+		return spec.exportAndroidArtifacts(APK, artifacts, deployDir)
+	case "appbundle":
+		return spec.exportAndroidArtifacts(AppBundle, artifacts, deployDir)
 	case "ios":
-		return spec.exportIOSArtifacts(outputPathPatterns, artifacts, deployDir)
+		return spec.exportIOSApp(artifacts, deployDir)
 	default:
-		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbuundle, ios", spec.platformCmdFlag)
+		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbundle, ios", spec.platformCmdFlag)
 	}
 }
 
@@ -52,13 +54,13 @@ func (spec buildSpecification) artifactPaths(outputPathPatterns []string, isDir 
 	return paths, nil
 }
 
-func (spec buildSpecification) exportIOSArtifacts(outputPathPatterns, artifacts []string, deployDir string) error {
+func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string) error {
 	artifact := artifacts[len(artifacts)-1]
-	if len(artifacts) > 1 {
-		log.Warnf("- Multiple artifacts found for pattern \"%v\": %v, exporting %s", outputPathPatterns, artifacts, artifact)
-	}
-
 	fileName := filepath.Base(artifact)
+
+	if len(artifacts) > 1 {
+		log.Warnf("- Multiple artifacts found: %v, exporting %s", artifacts, artifact)
+	}
 
 	if err := ziputil.ZipDir(artifact, filepath.Join(deployDir, fileName+".zip"), false); err != nil {
 		return err
@@ -73,7 +75,7 @@ func (spec buildSpecification) exportIOSArtifacts(outputPathPatterns, artifacts 
 	return nil
 }
 
-func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, outputPathPatterns, artifacts []string, deployDir string) error {
+func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, artifacts []string, deployDir string) error {
 	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
 
 	var singleFileOutputEnvName string

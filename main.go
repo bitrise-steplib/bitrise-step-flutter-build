@@ -26,8 +26,8 @@ const (
 	codesignField  = "ios-signing-cert"
 	noCodesignFlag = "--no-codesign"
 
-	APK       = "apk"
-	AppBundle = "appbundle"
+	APK       AndroidArtifactType = "apk"
+	AppBundle AndroidArtifactType = "appbundle"
 )
 
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
@@ -174,19 +174,17 @@ build:
 
 		var artifacts []string
 		var err error
-		switch spec.platformCmdFlag {
-		case "apk", "appbundle":
+
+		if spec.platformCmdFlag == "apk" || spec.platformCmdFlag == "appbundle" {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, false)
-		case "ios":
+		} else {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, true)
-		default:
-			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, false)
 		}
 		if err != nil {
 			failf("failed to find artifacts, error: %s", err)
 		}
 
-		if err := spec.exportArtifacts(spec.outputPathPatterns, artifacts, cfg.AndroidOutputType); err != nil {
+		if err := spec.exportArtifacts(artifacts); err != nil {
 			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
 	}

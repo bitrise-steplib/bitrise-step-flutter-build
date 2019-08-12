@@ -57,14 +57,14 @@ inputs:
       title: "Additional parameters"
       summary: "The flags from this input field will be appended to the `flutter build ios` command."
       description: "The flags from this input field will be appended to the `flutter build ios` command."
-      is_required: true
   - ios_output_pattern: "*build/ios/iphoneos/*.app"
     opts:
       category: "iOS Platform Configs"
       title: "Output pattern"
-      summary: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
+      summary: Pattern to find built artifacts relative to $BITRISE\_SOURCE\_DIR
       description: |-
         Separate patterns with a newline.
+      is_required: true
   - android_output_type: "apk"
     opts:
       category: "Android Platform Configs"
@@ -87,7 +87,7 @@ inputs:
     opts:
       category: "Android Platform Configs"
       title: "Output (.apk, .aab) pattern"
-      summary: "Pattern to find built APK or AAB artifacts relative to $BITRISE_SOURCE_DIR"
+      summary: Pattern to find built APK or AAB artifacts relative to $BITRISE\_SOURCE\_DIR
       description: |
         Will find the APK or AAB files - `depending on the build type input` - with the given pattern.<br/>
         Separate patterns with a newline.

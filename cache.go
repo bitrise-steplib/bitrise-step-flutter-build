@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -121,7 +122,7 @@ func parsePackageResolutionFile(contents string) (map[string]url.URL, error) {
 func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, error) {
 	var cachePaths []string
 
-	for _, location := range packageToLocation {
+	for packageName, location := range packageToLocation {
 		if location.Scheme != "file" && location.Scheme != "" {
 			log.Debugf("Flutter dependency cache: ignoring non-file scheme package: %s", location.Path)
 			continue
@@ -135,8 +136,11 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 
 		sep := string(os.PathSeparator)
 		location.Path = strings.TrimSuffix(location.Path, sep)
+		pathElements := strings.Split(location.Path, sep)
 
-		pathElements := strings.Split(strings.TrimSuffix(location.Path, sep), sep)
+		if len(pathElements) == 0 {
+			return []string{}, fmt.Errorf("package %s location is the root directory", packageName)
+		}
 
 		if !sliceutil.IsStringInSlice(".pub-cache", pathElements) {
 			log.Debugf("Flutter dependency cache: package not in system dependency cache: %s", location.Path)
@@ -149,7 +153,8 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 			continue
 		}
 
-		cachePaths = append(cachePaths, filepath.Dir(location.Path))
+		// Package path the parent of "lib"
+		cachePaths = append(cachePaths, path.Dir(location.Path))
 	}
 
 	return cachePaths, nil
@@ -168,7 +173,7 @@ func cacheFlutterDeps(projectDir string) error {
 
 	cachePaths, err := cacheableFlutterDepPaths(packageToLocation)
 	if err != nil {
-		return err
+		return nil
 	}
 	log.Debugf("Marking Flutter dependency paths to be cached: %s", cachePaths)
 

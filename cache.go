@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -154,7 +153,7 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 		}
 
 		// Package path the parent of "lib"
-		cachePaths = append(cachePaths, path.Dir(location.Path))
+		cachePaths = append(cachePaths, filepath.Dir(location.Path))
 	}
 
 	return cachePaths, nil

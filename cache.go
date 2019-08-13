@@ -172,7 +172,7 @@ func cacheFlutterDeps(projectDir string) error {
 
 	cachePaths, err := cacheableFlutterDepPaths(packageToLocation)
 	if err != nil {
-		return nil
+		return err
 	}
 	log.Debugf("Marking Flutter dependency paths to be cached: %s", cachePaths)
 

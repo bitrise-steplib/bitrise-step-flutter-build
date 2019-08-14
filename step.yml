@@ -81,6 +81,15 @@ inputs:
       title: "App bundle output pattern"
       summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
       description: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
+  - verbose: "false"
+    opts:
+      category: "Debug"
+      title: "Enable verbose log?"
+      description: |-
+        You can enable the verbose log for easier debugging.
+      value_options:
+        - "true"
+        - "false"
 
 outputs:
   - BITRISE_APK_PATH:

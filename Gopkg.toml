@@ -1,10 +1,27 @@
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/bitrise-io/go-steputils"
+
 [[constraint]]
   branch = "master"
   name = "github.com/bitrise-io/go-utils"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/bitrise-tools/go-steputils"
+  name = "github.com/bitrise-steplib/bitrise-step-android-unit-test"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/bitrise-io/go-xcode"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/kballard/go-shellquote"
+
+[[constraint]]
+  name = "github.com/ryanuber/go-glob"
+  version = "1.0.0"
 
 [prune]
   go-tests = true

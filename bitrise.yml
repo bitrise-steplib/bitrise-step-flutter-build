@@ -1,4 +1,4 @@
-format_version: 6
+format_version: 8
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
@@ -107,6 +107,22 @@ workflows:
         inputs:
         - path: ${ORIGIN_SOURCE_DIR}/_tmp
         - is_create_path: true
+
+  # ----------------------------------------------------------------
+  # --- Utility workflows
+  dep-update:
+    title: Dep update
+    description: |
+      Used for updating bitrise dependencies with dep
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            dep ensure -v
+            dep ensure -v -update
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library

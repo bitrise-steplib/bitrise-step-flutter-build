@@ -90,7 +90,7 @@ func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, 
 		deployedFiles = append(deployedFiles, deployedFilePath)
 	}
 	if err := tools.ExportEnvironmentWithEnvman(multipleFileOutputEnvName, strings.Join(deployedFiles, "\n")); err != nil {
-
+		return fmt.Errorf("failed to export enviroment variable %s, error: %s", multipleFileOutputEnvName, err)
 	}
 
 	log.Donef("- " + singleFileOutputEnvName + ": " + deployedFiles[len(deployedFiles)-1])

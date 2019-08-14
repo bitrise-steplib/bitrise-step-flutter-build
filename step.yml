@@ -83,7 +83,7 @@ inputs:
       description: "The flags from this input field will be appended to the `flutter build apk` command."
   - android_output_pattern: |-
       *build/app/outputs/apk/*/*.apk
-      */build/app/outputs/bundle/*/*.aab
+      *build/app/outputs/bundle/*/*.aab
     opts:
       category: "Android Platform Configs"
       title: "Output (.apk, .aab) pattern"
@@ -94,6 +94,12 @@ inputs:
         **Note**<br/>
         The step will export only the selected artifact type - `Android output artifact type` - even if the filter would accept other artifact types as well.
       is_required: true
+  - android_bundle_output_pattern: "*build/app/outputs/bundle/*/*.aab"
+    opts:	    
+      category: "Deprecated"
+      title: "[DEPRECATED] App bundle output pattern"	
+      summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR Deprecated, use `android_output_pattern` instead.""
+      description: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
 
 outputs:
   - BITRISE_APK_PATH:

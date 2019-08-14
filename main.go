@@ -43,11 +43,20 @@ type config struct {
 	IOSCodesignIdentity     string              `env:"ios_codesign_identity"`
 	ProjectLocation         string              `env:"project_location,dir"`
 	DebugMode               bool                `env:"is_debug_mode,opt[true,false]"`
+
+	// Deprecated
+	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
 }
 
 func failf(msg string, args ...interface{}) {
 	log.Errorf(msg, args...)
 	os.Exit(1)
+}
+
+func handleDeprecatedInputs(cfg config) {
+	if cfg.AndroidBundleExportPattern != "" && cfg.AndroidBundleExportPattern != "*build/app/outputs/bundle/*/*.aab" {
+		log.Warnf("step input 'App bundle output pattern' (android_bundle_output_pattern) is deprecated and will be removed on 20 November 2019, use 'Output (.apk, .aab) pattern' (android_output_pattern) instead!")
+	}
 }
 
 func main() {
@@ -56,6 +65,7 @@ func main() {
 		failf("Issue with input: %s", err)
 	}
 	stepconf.Print(cfg)
+	handleDeprecatedInputs(cfg)
 	log.SetEnableDebugLog(cfg.DebugMode)
 
 	if cfg.Platform == "ios" || cfg.Platform == "both" {

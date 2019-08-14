@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
-	"github.com/bitrise-tools/go-steputils/stepconf"
-	"github.com/bitrise-tools/go-xcode/certificateutil"
-	"github.com/kballard/go-shellquote"
+	"github.com/bitrise-io/go-xcode/certificateutil"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
 // AndroidArtifactType is an enum
@@ -46,6 +46,7 @@ type config struct {
 
 	// Deprecated
 	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
+
 }
 
 func failf(msg string, args ...interface{}) {
@@ -67,6 +68,18 @@ func main() {
 	stepconf.Print(cfg)
 	handleDeprecatedInputs(cfg)
 	log.SetEnableDebugLog(cfg.DebugMode)
+
+	projectLocationAbs, err := filepath.Abs(cfg.ProjectLocation)
+	if err != nil {
+		failf("Failed to get absolute project path, error: %s", err)
+	}
+
+	exist, err := pathutil.IsDirExists(projectLocationAbs)
+	if err != nil {
+		failf("Failed to check if project path exists, error: %s", err)
+	} else if !exist {
+		failf("Project path does not exist.")
+	}
 
 	if cfg.Platform == "ios" || cfg.Platform == "both" {
 		fmt.Println()
@@ -163,7 +176,7 @@ build:
 			continue
 		}
 
-		spec.projectLocation = cfg.ProjectLocation
+		spec.projectLocation = projectLocationAbs
 
 		fmt.Println()
 		log.Infof("Build " + spec.displayName)
@@ -197,5 +210,24 @@ build:
 		if err := spec.exportArtifacts(artifacts); err != nil {
 			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
 		}
+	}
+
+	fmt.Println()
+	log.Infof("Collecting cache")
+
+	if err := cacheCocoapodsDeps(projectLocationAbs); err != nil {
+		log.Warnf("Failed to collect cocoapods cache, error: %s", err)
+	}
+
+	if err := cacheCarthageDeps(projectLocationAbs); err != nil {
+		log.Warnf("Failed to collect carthage cache, error: %s", err)
+	}
+
+	if err := cacheAndroidDeps(projectLocationAbs); err != nil {
+		log.Warnf("Failed to collect android cache, error: %s", err)
+	}
+
+	if err := cacheFlutterDeps(projectLocationAbs); err != nil {
+		log.Warnf("Failed to collect flutter cache, error: %s", err)
 	}
 }

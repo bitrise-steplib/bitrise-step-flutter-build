@@ -51,7 +51,7 @@ inputs:
       title: "Codesign Identity"
       summary: "Override codesign identity in .flutter_settings"
       description: "Override codesign identity in .flutter_settings"
-  - ios_additional_params: "--release"
+  - ios_additional_params: "--release --no-codesign"
     opts:
       category: "iOS Platform Configs"
       title: "Additional parameters"

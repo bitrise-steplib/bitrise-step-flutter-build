@@ -98,7 +98,7 @@ inputs:
     opts:	    
       category: "Deprecated"
       title: "[DEPRECATED] App bundle output pattern"	
-      summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR Deprecated, use `android_output_pattern` instead.""
+      summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR Deprecated, use `android_output_pattern` instead."
       description: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
 
 outputs:

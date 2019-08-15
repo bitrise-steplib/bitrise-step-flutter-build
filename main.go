@@ -46,7 +46,6 @@ type config struct {
 
 	// Deprecated
 	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
-
 }
 
 func failf(msg string, args ...interface{}) {
@@ -54,9 +53,13 @@ func failf(msg string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func handleDeprecatedInputs(cfg config) {
+func handleDeprecatedInputs(cfg *config) {
 	if cfg.AndroidBundleExportPattern != "" && cfg.AndroidBundleExportPattern != "*build/app/outputs/bundle/*/*.aab" {
 		log.Warnf("step input 'App bundle output pattern' (android_bundle_output_pattern) is deprecated and will be removed on 20 November 2019, use 'Output (.apk, .aab) pattern' (android_output_pattern) instead!")
+		log.Printf("Using 'App bundle output pattern' (android_bundle_output_pattern) instead of 'Output (.apk, .aab) pattern' (android_output_pattern).")
+		log.Printf("If you don't want to use 'App bundle output pattern' (android_bundle_output_pattern), empty it's value.")
+
+		cfg.AndroidExportPattern = cfg.AndroidBundleExportPattern
 	}
 }
 
@@ -66,7 +69,7 @@ func main() {
 		failf("Issue with input: %s", err)
 	}
 	stepconf.Print(cfg)
-	handleDeprecatedInputs(cfg)
+	handleDeprecatedInputs(&cfg)
 	log.SetEnableDebugLog(cfg.DebugMode)
 
 	projectLocationAbs, err := filepath.Abs(cfg.ProjectLocation)

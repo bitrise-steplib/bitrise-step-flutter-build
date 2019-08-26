@@ -35,6 +35,16 @@ inputs:
         - "both"
         - "ios"
         - "android"
+  - is_debug_mode: "false"
+    opts:
+      title: "Debug mode?"
+      summary: "If debug mode is enabled, the step will print verbose logs"
+      description: |-
+        If debug mode is enabled, the step will print verbose logs
+      is_required: true
+      value_options:
+      - "true"
+      - "false"
   - ios_codesign_identity: 
     opts:
       category: "iOS Platform Configs"
@@ -51,8 +61,10 @@ inputs:
     opts:
       category: "iOS Platform Configs"
       title: "Output pattern"
-      summary: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
-      description: "Pattern to find built artifacts relative to $BITRISE_SOURCE_DIR"
+      summary: Pattern to find built artifacts relative to $BITRISE\_SOURCE\_DIR
+      description: |-
+        Separate patterns with a newline.
+      is_required: true
   - android_output_type: "apk"
     opts:
       category: "Android Platform Configs"
@@ -69,27 +81,25 @@ inputs:
       title: "Additional parameters"
       summary: "The flags from this input field will be appended to the `flutter build apk` command."
       description: "The flags from this input field will be appended to the `flutter build apk` command."
-  - android_output_pattern: "*build/app/outputs/apk/*/*.apk"
+  - android_output_pattern: |-
+      *build/app/outputs/apk/*/*.apk
+      *build/app/outputs/bundle/*/*.aab
     opts:
       category: "Android Platform Configs"
-      title: "APK output pattern"
-      summary: "Pattern to find built APK artifacts relative to $BITRISE_SOURCE_DIR"
-      description: "Pattern to find built APK artifacts relative to $BITRISE_SOURCE_DIR"
+      title: "Output (.apk, .aab) pattern"
+      summary: Pattern to find built APK or AAB artifacts relative to $BITRISE\_SOURCE\_DIR
+      description: |
+        Will find the APK or AAB files - `depending on the build type input` - with the given pattern.<br/>
+        Separate patterns with a newline.
+        **Note**<br/>
+        The step will export only the selected artifact type - `Android output artifact type` - even if the filter would accept other artifact types as well.
+      is_required: true
   - android_bundle_output_pattern: "*build/app/outputs/bundle/*/*.aab"
-    opts:
-      category: "Android Platform Configs"
-      title: "App bundle output pattern"
-      summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
+    opts:	    
+      category: "Deprecated"
+      title: "[DEPRECATED] App bundle output pattern"	
+      summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR Deprecated, use `android_output_pattern` instead."
       description: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
-  - verbose: "false"
-    opts:
-      category: "Debug"
-      title: "Enable verbose log?"
-      description: |-
-        You can enable the verbose log for easier debugging.
-      value_options:
-        - "true"
-        - "false"
 
 outputs:
   - BITRISE_APK_PATH:

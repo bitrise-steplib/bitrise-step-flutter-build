@@ -21,6 +21,7 @@ workflows:
     - test_ios
     - test_android_apk
     - test_android_aab
+    - test_android_split_apk
     - test_both
 
   ci-android-only:
@@ -46,6 +47,7 @@ workflows:
         - content: git clone $SAMPLE_APP_URL -b manual .
     - path::./:
         inputs: 
+        - is_debug_mode: "true"
         - platform: ios
 
   test_android_apk:
@@ -58,6 +60,21 @@ workflows:
         - content: git clone $SAMPLE_APP_URL .
     - path::./:
         inputs: 
+        - is_debug_mode: "true"
+        - platform: android
+
+  test_android_split_apk:
+    before_run:
+    - _clear_workdir
+    steps:
+    - script:
+        title: Clone sample app
+        inputs:
+        - content: git clone $SAMPLE_APP_URL .
+    - path::./:
+        inputs: 
+        - android_additional_params: --release --split-per-abi
+        - is_debug_mode: "true"
         - platform: android
 
   test_android_aab:
@@ -70,6 +87,7 @@ workflows:
             - content: git clone $SAMPLE_APP_URL .
       - path::./:
           inputs:
+            - is_debug_mode: "true"
             - platform: android
             - android_output_type: appbundle
 
@@ -82,7 +100,8 @@ workflows:
         inputs:
         - content: git clone $SAMPLE_APP_URL -b manual .
     - path::./:
-        inputs: 
+        inputs:
+        - is_debug_mode: "true" 
         - platform: both
 
   _clear_workdir:

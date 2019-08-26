@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -22,52 +23,60 @@ type buildSpecification struct {
 	displayName          string
 	platformCmdFlag      string
 	platformSelectors    []string
-	outputPathPattern    string
+	outputPathPatterns   []string
 	additionalParameters string
 	projectLocation      string
 }
 
-func (spec buildSpecification) exportArtifacts(outputPathPattern string) error {
+func (spec buildSpecification) exportArtifacts(artifacts []string) error {
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
 	switch spec.platformCmdFlag {
 	case "apk":
-		fallthrough
+		return spec.exportAndroidArtifacts(APK, artifacts, deployDir)
 	case "appbundle":
-		return spec.exportAndroidArtifacts(outputPathPattern, deployDir)
+		return spec.exportAndroidArtifacts(AppBundle, artifacts, deployDir)
 	case "ios":
-		paths, err := findPaths(spec.projectLocation, outputPathPattern, true)
-		if err != nil {
-			return err
-		}
-
-		path := paths[len(paths)-1]
-		if len(paths) > 1 {
-			log.Warnf("- Multiple artifacts found for pattern \"%s\": %v, exporting %s", outputPathPattern, paths, path)
-		}
-
-		fileName := filepath.Base(path)
-
-		if err := ziputil.ZipDir(path, filepath.Join(deployDir, fileName+".zip"), false); err != nil {
-			return err
-		}
-		log.Donef("- $BITRISE_DEPLOY_DIR/" + fileName + ".zip")
-
-		if err := tools.ExportEnvironmentWithEnvman("BITRISE_APP_DIR_PATH", path); err != nil {
-			return err
-		}
-		log.Donef("- $BITRISE_APP_DIR_PATH: " + path)
-
-		return nil
+		return spec.exportIOSApp(artifacts, deployDir)
 	default:
-		return fmt.Errorf("unsupported platform for exporting artifacts")
+		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbundle, ios", spec.platformCmdFlag)
 	}
 }
 
-func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, deployDir string) error {
-	paths, err := findPaths(spec.projectLocation, outputPathPattern, false)
-	if err != nil {
+func (spec buildSpecification) artifactPaths(outputPathPatterns []string, isDir bool) ([]string, error) {
+	var paths []string
+	for _, outputPathPattern := range outputPathPatterns {
+		pths, err := findPaths(spec.projectLocation, outputPathPattern, isDir)
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, pths...)
+	}
+	return paths, nil
+}
+
+func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string) error {
+	artifact := artifacts[len(artifacts)-1]
+	fileName := filepath.Base(artifact)
+
+	if len(artifacts) > 1 {
+		log.Warnf("- Multiple artifacts found: %v, exporting %s", artifacts, artifact)
+	}
+
+	if err := ziputil.ZipDir(artifact, filepath.Join(deployDir, fileName+".zip"), false); err != nil {
 		return err
 	}
+	log.Donef("- $BITRISE_DEPLOY_DIR/" + fileName + ".zip")
+
+	if err := tools.ExportEnvironmentWithEnvman("BITRISE_APP_DIR_PATH", artifact); err != nil {
+		return err
+	}
+	log.Donef("- $BITRISE_APP_DIR_PATH: " + artifact)
+
+	return nil
+}
+
+func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, artifacts []string, deployDir string) error {
+	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
 
 	var singleFileOutputEnvName string
 	var multipleFileOutputEnvName string
@@ -81,7 +90,7 @@ func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, 
 	}
 
 	var deployedFiles []string
-	for _, path := range paths {
+	for _, path := range artifacts {
 		deployedFilePath := filepath.Join(deployDir, filepath.Base(path))
 
 		if err := output.ExportOutputFile(path, deployedFilePath, singleFileOutputEnvName); err != nil {
@@ -96,6 +105,27 @@ func (spec buildSpecification) exportAndroidArtifacts(outputPathPattern string, 
 	log.Donef("- " + singleFileOutputEnvName + ": " + deployedFiles[len(deployedFiles)-1])
 	log.Donef("- " + multipleFileOutputEnvName + ": " + strings.Join(deployedFiles, "|"))
 	return nil
+}
+
+func filterAndroidArtifactsBy(androidOutputType AndroidArtifactType, artifacts []string) []string {
+	var index int
+	for _, artifact := range artifacts {
+		switch androidOutputType {
+		case APK:
+			if path.Ext(artifact) != ".apk" {
+				log.Debugf("Arfifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
+				continue // drop artifact
+			}
+		case AppBundle:
+			if path.Ext(artifact) != ".aab" {
+				log.Debugf("Arfifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
+				continue // drop artifact
+			}
+		}
+		artifacts[index] = artifact
+		index++
+	}
+	return artifacts[:index]
 }
 
 func (spec buildSpecification) buildable(platform string) bool {
@@ -116,7 +146,7 @@ func findPaths(location string, outputPathPattern string, dir bool) (out []strin
 		return nil
 	})
 	if len(out) == 0 && err == nil {
-		err = fmt.Errorf("couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern))
+		log.Debugf("couldn't find output artifact on path: " + filepath.Join(location, outputPathPattern))
 	}
 	return
 }

@@ -146,6 +146,11 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 			continue
 		}
 
+		if sliceutil.IsStringInSlice("git", pathElements) {
+			log.Debugf("Flutter dependency cache: packages from git will not be cached: %s", location.Path)
+			continue
+		}
+
 		// https://dart.dev/guides/libraries/create-library-packages
 		if pathElements[len(pathElements)-1] != "lib" {
 			log.Warnf("Flutter dependency cache: package path does not have top level 'lib' element: %s", location.Path)

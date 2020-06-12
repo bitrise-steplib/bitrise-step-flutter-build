@@ -4,7 +4,7 @@ description: |-
   This Step builds an iOS and an Android app. By default the Step builds the artifact based on the platform the scanner detects.
   
   ### Configuring the Step
-  1. Add the root directory of your project in the **Project Location** input.
+  1. In the **Project Location** input the root directory of your Flutter project is automatically filled out.
   2. Select which platform your project should be built for (`ios`, `android` or `both`).
   3. Enable **Debug** option to get verbose logs and see where the Step is failing.
   

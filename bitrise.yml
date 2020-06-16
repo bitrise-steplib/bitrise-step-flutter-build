@@ -57,7 +57,10 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL .
+        - content: |-
+            #!/bin/bash
+            git clone $SAMPLE_APP_URL .
+            flutter packages get
     - path::./:
         inputs: 
         - is_debug_mode: "true"
@@ -70,7 +73,10 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL .
+        - content: |-
+            #!/bin/bash
+            git clone $SAMPLE_APP_URL .
+            flutter packages get
     - path::./:
         inputs: 
         - android_additional_params: --release --split-per-abi
@@ -84,7 +90,10 @@ workflows:
       - script:
           title: Clone sample app
           inputs:
-            - content: git clone $SAMPLE_APP_URL .
+            - content: |-
+                #!/bin/bash
+                git clone $SAMPLE_APP_URL .
+                flutter packages get
       - path::./:
           inputs:
             - is_debug_mode: "true"

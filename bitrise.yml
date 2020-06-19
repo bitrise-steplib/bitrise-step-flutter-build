@@ -18,6 +18,7 @@ workflows:
     - go-test:
     - flutter-installer:
     after_run:
+    - test_cache
     - test_ios
     - test_android_apk
     - test_android_aab
@@ -44,7 +45,7 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL -b manual .
+        - content: git clone $SAMPLE_APP_URL .
     - path::./:
         inputs: 
         - is_debug_mode: "true"
@@ -98,11 +99,44 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-        - content: git clone $SAMPLE_APP_URL -b manual .
+        - content: git clone $SAMPLE_APP_URL .
     - path::./:
         inputs:
         - is_debug_mode: "true" 
         - platform: both
+
+
+  test_cache:
+    envs:
+    - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache
+    before_run:
+    - _clear_workdir
+    steps:
+    - script:
+        title: Clone sample app
+        inputs:
+          - content: git clone $SAMPLE_APP_URL .
+    - cache-pull:
+        run_if: true
+    - path::./:
+        inputs:
+        - is_debug_mode: "true" 
+        - platform: android
+        - android_output_type: apk
+    - cache-push:
+        run_if: true
+    - script:
+        input:
+        - content: |-
+            rm -rf $HOME/.pub-cache
+    - cache-pull:
+        run_if: true
+    - path::./:
+        inputs:
+        - is_debug_mode: "true" 
+        - platform: android
+        - android_output_type: apk
+          
 
   _clear_workdir:
     envs:

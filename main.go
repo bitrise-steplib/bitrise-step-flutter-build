@@ -164,14 +164,14 @@ build:
 			displayName:          "iOS",
 			platformCmdFlag:      "ios",
 			platformSelectors:    []string{"both", "ios"},
-			outputPathPatterns:   append(strings.Split(cfg.IOSExportPattern, "\n")),
+			outputPathPatterns:   strings.Split(cfg.IOSExportPattern, "\n"),
 			additionalParameters: cfg.IOSAdditionalParams,
 		},
 		{
 			displayName:          "Android",
 			platformCmdFlag:      string(cfg.AndroidOutputType),
 			platformSelectors:    []string{"both", "android"},
-			outputPathPatterns:   append(strings.Split(cfg.AndroidExportPattern, "\n")),
+			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
 			additionalParameters: cfg.AndroidAdditionalParams,
 		},
 	} {

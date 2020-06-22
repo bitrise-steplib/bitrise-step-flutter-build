@@ -117,7 +117,10 @@ func Test_cacheableFlutterDepPaths(t *testing.T) {
 	yamlURL.Path = "/Users/vagrant/.pub-cache/hosted/pub.dartlang.org/yaml-2.1.15/lib/"
 
 	var gitURL url.URL
-	gitURL.Path = "file:///Users/vagrant/.pub-cache/git/sample-apps-flutter-sample-pub-package-afc598ac6dc1a8e39ff7fd505463fd1df9f7c600/mypath/lib/"
+	gitURL.Path = "/Users/vagrant/.pub-cache/git/sample-apps-flutter-sample-pub-package-afc598ac6dc1a8e39ff7fd505463fd1df9f7c600/mypath/lib/"
+
+	var gitURL2 url.URL
+	gitURL2.Path = "/Users/vagrant/.pub-cache/git/sample-apps-flutter-ios-android-package-f44f5a21cd47f45db70faa1a6aed8c8035483d73/lib"
 
 	tests := []struct {
 		name              string
@@ -140,7 +143,20 @@ func Test_cacheableFlutterDepPaths(t *testing.T) {
 			packageToLocation: map[string]url.URL{
 				"sample_package": gitURL,
 			},
-			want:    nil,
+			want: []string{
+				"/Users/vagrant/.pub-cache/git",
+			},
+			wantErr: false,
+		},
+		{
+			name: "multiple packages from git",
+			packageToLocation: map[string]url.URL{
+				"sample_package":  gitURL,
+				"sample_package2": gitURL2,
+			},
+			want: []string{
+				"/Users/vagrant/.pub-cache/git",
+			},
 			wantErr: false,
 		},
 	}

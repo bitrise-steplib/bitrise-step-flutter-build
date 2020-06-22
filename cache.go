@@ -80,8 +80,42 @@ func openPackageResolutionFile(projectDir string) (string, error) {
 	return string(contents), nil
 }
 
-// parsePackageResolutionFile parses flutter package resolution file: ".package"
+// parsePackageResolutionFile parses flutter package resolution file: `.package`
 // https://dart.dev/tools/pub/cmd/pub-get
+/* If there are any packages from git source the whole `git` directory is cached,
+as the contents of `.git` dir may be needed for package resolution.
+The layout of .pub-cache:
+.pub-cache
+|- global_packages
+    |- junitreport
+        …
+    …
+|- bin
+    |- tojunit
+    …
+|- git     									→ packages from git source
+     |- cache
+          |- <package_name>-<commit_hash>   →  A copy of the .git dir
+               |- refs
+               …
+          |- <package_name2>-<commit_hash2> →  An other copy of the .git dir
+          …
+     |- <package_name>-<commit_hash>  		→  A checked out package
+          |- .git
+          |- lib
+          …
+     |- <package_name2>-<commit_hash2>		→  An other checked out package
+          |- .git
+              |- .pub-packages   			→  Needs to be cached
+          |- mypath
+              |- lib       					→  The resolved source code path for packages from git
+         …
+|- hosted    								→  Hosted packages
+    |- pub.dartlang.org
+        |- async-2.4.1
+            |- lib							→  The resolved package source code path for hosted packages
+        …
+*/
 func parsePackageResolutionFile(contents string) (map[string]url.URL, error) {
 	// Both line seperators are supported, empty lines will be ignored
 	// https://github.com/lrhn/dep-pkgspec/blob/master/DEP-pkgspec.md#proposal
@@ -120,6 +154,7 @@ func parsePackageResolutionFile(contents string) (map[string]url.URL, error) {
 
 func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, error) {
 	var cachePaths []string
+	foundGitSourcePackages := false
 
 	for packageName, location := range packageToLocation {
 		if location.Scheme != "file" && location.Scheme != "" {
@@ -141,19 +176,31 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 			return []string{}, fmt.Errorf("package %s location is the root directory", packageName)
 		}
 
-		if !sliceutil.IsStringInSlice(".pub-cache", pathElements) {
+		cacheRootIndex := sliceutil.IndexOfStringInSlice(".pub-cache", pathElements)
+		if cacheRootIndex == -1 {
 			log.Debugf("Flutter dependency cache: package not in system dependency cache: %s", location.Path)
-			continue
-		}
-
-		if sliceutil.IsStringInSlice("git", pathElements) {
-			log.Debugf("Flutter dependency cache: packages from git will not be cached: %s", location.Path)
 			continue
 		}
 
 		// https://dart.dev/guides/libraries/create-library-packages
 		if pathElements[len(pathElements)-1] != "lib" {
 			log.Warnf("Flutter dependency cache: package path does not have top level 'lib' element: %s", location.Path)
+			continue
+		}
+
+		gitRootIndex := cacheRootIndex + 1
+		if len(pathElements) > gitRootIndex+1 && pathElements[gitRootIndex] == "git" {
+			log.Debugf("Flutter dependency cache: found pub package with git source: %s", location.Path)
+			if !foundGitSourcePackages {
+				foundGitSourcePackages = true
+				// Append git packages root path, e.g $HOME/.pub-cache/git
+				// (.pub-cache dir can be located in $HOME or in the Flutter SDK dir.)
+				gitRoot := location.Path
+				for ; gitRootIndex < len(pathElements)-1; gitRootIndex++ {
+					gitRoot = filepath.Dir(gitRoot)
+				}
+				cachePaths = append(cachePaths, gitRoot)
+			}
 			continue
 		}
 

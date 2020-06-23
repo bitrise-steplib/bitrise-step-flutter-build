@@ -108,14 +108,19 @@ workflows:
 
   test_cache:
     envs:
-    - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache
+    - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache.tar.gz
     before_run:
     - _clear_workdir
     steps:
     - script:
         title: Clone sample app
         inputs:
-          - content: git clone $SAMPLE_APP_URL .
+          - content: |-
+              git clone $SAMPLE_APP_URL .
+    - script:
+        input:
+        - content: |-
+            rm -rf $HOME/.pub-cache
     - cache-pull:
         run_if: true
     - path::./:
@@ -123,6 +128,8 @@ workflows:
         - is_debug_mode: "true" 
         - platform: android
         - android_output_type: apk
+        - android_additional_params: ''
+        - cache_level: all
     - cache-push:
         run_if: true
     - script:
@@ -136,6 +143,8 @@ workflows:
         - is_debug_mode: "true" 
         - platform: android
         - android_output_type: apk
+        - android_additional_params: ''
+        - cache_level: all
           
 
   _clear_workdir:

@@ -43,6 +43,7 @@ type config struct {
 	IOSCodesignIdentity     string              `env:"ios_codesign_identity"`
 	ProjectLocation         string              `env:"project_location,dir"`
 	DebugMode               bool                `env:"is_debug_mode,opt[true,false]"`
+	CacheLevel              string              `env:"cache_level,opt[all,none]"`
 
 	// Deprecated
 	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
@@ -164,14 +165,14 @@ build:
 			displayName:          "iOS",
 			platformCmdFlag:      "ios",
 			platformSelectors:    []string{"both", "ios"},
-			outputPathPatterns:   append(strings.Split(cfg.IOSExportPattern, "\n")),
+			outputPathPatterns:   strings.Split(cfg.IOSExportPattern, "\n"),
 			additionalParameters: cfg.IOSAdditionalParams,
 		},
 		{
 			displayName:          "Android",
 			platformCmdFlag:      string(cfg.AndroidOutputType),
 			platformSelectors:    []string{"both", "android"},
-			outputPathPatterns:   append(strings.Split(cfg.AndroidExportPattern, "\n")),
+			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
 			additionalParameters: cfg.AndroidAdditionalParams,
 		},
 	} {
@@ -215,22 +216,24 @@ build:
 		}
 	}
 
-	fmt.Println()
-	log.Infof("Collecting cache")
+	if cfg.CacheLevel == "all" {
+		fmt.Println()
+		log.Infof("Collecting cache")
 
-	if err := cacheCocoapodsDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect cocoapods cache, error: %s", err)
-	}
+		if err := cacheCocoapodsDeps(projectLocationAbs); err != nil {
+			log.Warnf("Failed to collect cocoapods cache, error: %s", err)
+		}
 
-	if err := cacheCarthageDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect carthage cache, error: %s", err)
-	}
+		if err := cacheCarthageDeps(projectLocationAbs); err != nil {
+			log.Warnf("Failed to collect carthage cache, error: %s", err)
+		}
 
-	if err := cacheAndroidDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect android cache, error: %s", err)
-	}
+		if err := cacheAndroidDeps(projectLocationAbs); err != nil {
+			log.Warnf("Failed to collect android cache, error: %s", err)
+		}
 
-	if err := cacheFlutterDeps(projectLocationAbs); err != nil {
-		log.Warnf("Failed to collect flutter cache, error: %s", err)
+		if err := cacheFlutterDeps(projectLocationAbs); err != nil {
+			log.Warnf("Failed to collect flutter cache, error: %s", err)
+		}
 	}
 }

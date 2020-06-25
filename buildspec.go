@@ -102,7 +102,12 @@ func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidA
 		return fmt.Errorf("failed to export enviroment variable %s, error: %s", multipleFileOutputEnvName, err)
 	}
 
-	log.Donef("- " + singleFileOutputEnvName + ": " + deployedFiles[len(deployedFiles)-1])
+	deployedSingleFile := ""
+	if len(deployedFiles) > 0 {
+		deployedSingleFile = deployedFiles[len(deployedFiles)-1]
+	}
+
+	log.Donef("- " + singleFileOutputEnvName + ": " + deployedSingleFile)
 	log.Donef("- " + multipleFileOutputEnvName + ": " + strings.Join(deployedFiles, "|"))
 	return nil
 }

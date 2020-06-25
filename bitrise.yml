@@ -63,12 +63,6 @@ workflows:
         inputs: 
         - is_debug_mode: "true"
         - platform: android
-    - script:
-        title: Print Environment Variables
-        inputs:
-        - content: |-
-            echo "BITRISE_APK_PATH: $BITRISE_APK_PATH"
-            echo "BITRISE_APK_PATH_LIST: $BITRISE_APK_PATH_LIST"
   test_android_split_apk:
     before_run:
     - _clear_workdir

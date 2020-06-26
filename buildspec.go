@@ -78,6 +78,10 @@ func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string
 func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, artifacts []string, deployDir string) error {
 	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
 
+	if len(artifacts) < 1 {
+		return fmt.Errorf("Artifact list did not contain any artifacts of type %s", androidOutputType)
+	}
+
 	var singleFileOutputEnvName string
 	var multipleFileOutputEnvName string
 	switch spec.platformCmdFlag {

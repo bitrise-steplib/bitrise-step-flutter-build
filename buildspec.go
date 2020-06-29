@@ -79,7 +79,7 @@ func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidA
 	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
 
 	if len(artifacts) < 1 {
-		return fmt.Errorf("Artifact list did not contain any artifacts of type %s", androidOutputType)
+		return fmt.Errorf("artifact list did not contain any artifacts of type %s", androidOutputType)
 	}
 
 	var singleFileOutputEnvName string

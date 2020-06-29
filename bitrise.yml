@@ -63,7 +63,6 @@ workflows:
         inputs: 
         - is_debug_mode: "true"
         - platform: android
-
   test_android_split_apk:
     before_run:
     - _clear_workdir

@@ -78,6 +78,10 @@ func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string
 func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, artifacts []string, deployDir string) error {
 	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
 
+	if len(artifacts) < 1 {
+		return fmt.Errorf("artifact list did not contain any artifacts of type %s", androidOutputType)
+	}
+
 	var singleFileOutputEnvName string
 	var multipleFileOutputEnvName string
 	switch spec.platformCmdFlag {
@@ -102,7 +106,12 @@ func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidA
 		return fmt.Errorf("failed to export enviroment variable %s, error: %s", multipleFileOutputEnvName, err)
 	}
 
-	log.Donef("- " + singleFileOutputEnvName + ": " + deployedFiles[len(deployedFiles)-1])
+	deployedSingleFile := ""
+	if len(deployedFiles) > 0 {
+		deployedSingleFile = deployedFiles[len(deployedFiles)-1]
+	}
+
+	log.Donef("- " + singleFileOutputEnvName + ": " + deployedSingleFile)
 	log.Donef("- " + multipleFileOutputEnvName + ": " + strings.Join(deployedFiles, "|"))
 	return nil
 }

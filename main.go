@@ -207,8 +207,13 @@ build:
 		} else {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, true)
 		}
+
 		if err != nil {
 			failf("failed to find artifacts, error: %s", err)
+		}
+
+		if len(artifacts) < 1 {
+			failf("artifact path pattern `%s` did not match any artifacts", spec.outputPathPatterns)
 		}
 
 		if err := spec.exportArtifacts(artifacts); err != nil {

@@ -213,7 +213,8 @@ build:
 		}
 
 		if len(artifacts) < 1 {
-			failf("artifact path pattern `%s` did not match any artifacts", spec.outputPathPatterns)
+			failf(`Artifact path pattern (%s) did not match any artifacts on the path (%s).
+Check that 'iOS/Android Output Pattern' and 'Project Location' is correct.`, spec.outputPathPatterns, spec.projectLocation)
 		}
 
 		if err := spec.exportArtifacts(artifacts); err != nil {

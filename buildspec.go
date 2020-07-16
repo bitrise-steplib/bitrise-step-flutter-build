@@ -55,6 +55,10 @@ func (spec buildSpecification) artifactPaths(outputPathPatterns []string, isDir 
 }
 
 func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string) error {
+	if len(artifacts) < 1 {
+		return fmt.Errorf("- No artifacts found")
+	}
+
 	artifact := artifacts[len(artifacts)-1]
 	fileName := filepath.Base(artifact)
 

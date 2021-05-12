@@ -1,0 +1,42 @@
+# github.com/bitrise-io/go-steputils v0.0.0-20190719100740-7c9aaee1af95
+## explicit
+github.com/bitrise-io/go-steputils/cache
+github.com/bitrise-io/go-steputils/stepconf
+github.com/bitrise-io/go-steputils/tools
+# github.com/bitrise-io/go-utils v0.0.0-20190718131923-cb35044c1bab
+## explicit
+github.com/bitrise-io/go-utils/colorstring
+github.com/bitrise-io/go-utils/command
+github.com/bitrise-io/go-utils/errorutil
+github.com/bitrise-io/go-utils/fileutil
+github.com/bitrise-io/go-utils/log
+github.com/bitrise-io/go-utils/parseutil
+github.com/bitrise-io/go-utils/pathutil
+github.com/bitrise-io/go-utils/pkcs12
+github.com/bitrise-io/go-utils/pkcs12/internal/rc2
+github.com/bitrise-io/go-utils/pointers
+github.com/bitrise-io/go-utils/sliceutil
+github.com/bitrise-io/go-utils/ziputil
+# github.com/bitrise-io/go-xcode v0.0.0-20190718082554-07ccf582b6b1
+## explicit
+github.com/bitrise-io/go-xcode/certificateutil
+# github.com/bitrise-steplib/bitrise-step-android-unit-test v0.0.0-20190604153412-dd2535d711f8
+## explicit
+github.com/bitrise-steplib/bitrise-step-android-unit-test/cache
+# github.com/bitrise-tools/go-steputils v0.0.0-20190719100740-7c9aaee1af95
+## explicit
+github.com/bitrise-tools/go-steputils/output
+github.com/bitrise-tools/go-steputils/tools
+# github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+## explicit
+github.com/kballard/go-shellquote
+# github.com/pkg/errors v0.8.2-0.20190227000051-27936f6d90f9
+## explicit
+github.com/pkg/errors
+# github.com/ryanuber/go-glob v1.0.0
+## explicit
+github.com/ryanuber/go-glob
+# github.com/stretchr/testify v1.7.0
+## explicit
+# gopkg.in/yaml.v2 v2.4.0
+## explicit

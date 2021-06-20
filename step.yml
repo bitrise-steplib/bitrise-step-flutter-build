@@ -73,6 +73,12 @@ inputs:
         - "both"
         - "ios"
         - "android"
+  - additional_build_params: ""
+    opts:
+      title: "Additional params for flutter build"
+      summary: "Additional params for flutter build"
+      description: "Additional params for flutter build"
+      is_required: false
   - is_debug_mode: "false"
     opts:
       title: "Debug mode?"

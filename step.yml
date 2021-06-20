@@ -81,7 +81,7 @@ inputs:
         Additional params for flutter build.
         
         Example: you can specify a Build Number for `flutter build`
-        via the `--build-number` `flutter build` param.
+        via the `--build-number` flutter build param.
       is_required: false
   - is_debug_mode: "false"
     opts:

@@ -12,7 +12,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
-	androidCache "github.com/bitrise-steplib/bitrise-step-android-unit-test/cache"
+	androidCache "github.com/bitrise-io/go-android/cache"
 )
 
 func cacheCocoapodsDeps(projectLocation string) error {
@@ -62,7 +62,7 @@ func cacheAndroidDeps(projectDir string) error {
 		return nil
 	}
 
-	return androidCache.Collect(androidDir, androidCache.LevelDeps)
+	return androidCache.Collect(androidDir, cache.LevelDeps)
 }
 
 func openPackageResolutionFile(projectDir string) (string, error) {

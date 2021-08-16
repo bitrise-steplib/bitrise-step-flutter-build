@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-utils/stringutil"
 	"github.com/bitrise-io/go-utils/ziputil"
-	"github.com/bitrise-io/go-steputils/tools"
 )
 
 // ExportOutputDir ...
@@ -58,6 +59,19 @@ func ExportOutputFileContent(content, destinationPth, envKey string) error {
 	}
 
 	return ExportOutputFile(destinationPth, destinationPth, envKey)
+}
+
+// ExportOutputFileContentAndReturnLastNLines ...
+func ExportOutputFileContentAndReturnLastNLines(content, destinationPath, envKey string, lines int) (string, error) {
+	if err := fileutil.WriteStringToFile(destinationPath, content); err != nil {
+		return "", err
+	}
+
+	if err := ExportOutputFile(destinationPath, destinationPath, envKey); err != nil {
+		return "", err
+	}
+
+	return stringutil.LastNLines(content, lines), nil
 }
 
 // ZipAndExportOutput ...

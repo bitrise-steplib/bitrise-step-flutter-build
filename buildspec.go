@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bitrise-io/go-steputils/output"
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-utils/ziputil"
-	"github.com/bitrise-tools/go-steputils/output"
-	"github.com/bitrise-tools/go-steputils/tools"
 	"github.com/kballard/go-shellquote"
 	"github.com/ryanuber/go-glob"
 )

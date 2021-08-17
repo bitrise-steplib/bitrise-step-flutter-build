@@ -161,7 +161,7 @@ func main() {
 
 build:
 
-	for _, spec := range []buildSpecification{
+	buildSpecifications := []buildSpecification{
 		{
 			displayName:          "iOS",
 			platformCmdFlag:      "ios",
@@ -176,7 +176,9 @@ build:
 			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
 			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.AndroidAdditionalParams,
 		},
-	} {
+	}
+
+	for _, spec := range buildSpecifications {
 		if !spec.buildable(cfg.Platform) {
 			continue
 		}

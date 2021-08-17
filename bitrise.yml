@@ -104,6 +104,28 @@ workflows:
         - is_debug_mode: "true"
         - platform: both
 
+  test_additional_build_params_android:
+    before_run:
+    - _clear_workdir
+    steps:
+    - script:
+        title: Clone sample app
+        inputs:
+        - content: git clone $SAMPLE_APP_URL .
+    - path::./:
+        inputs:
+        - additional_build_params: "--split-per-abi"
+        - platform: android
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+            apk_count=$(echo $BITRISE_APK_PATH_LIST | sed 's/|/\n/g' | wc -w)
+            if [ $apk_count -eq 1 ]; then
+              echo "Got 1 exported APK but more were expected because --split-per-abi was specified."
+              exit 1
+            fi
 
   test_cache:
     envs:

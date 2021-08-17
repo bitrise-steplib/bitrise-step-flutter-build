@@ -23,6 +23,8 @@ workflows:
     - test_android_aab
     - test_android_split_apk
     - test_both
+    - test_additional_build_params_android
+    - test_additional_build_params_ios
 
   ci-android-only:
     before_run:
@@ -36,12 +38,13 @@ workflows:
     after_run:
     - test_android_apk
     - test_android_aab
+    - test_android_split_apk
 
   test_ios:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -55,7 +58,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -69,7 +72,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -84,7 +87,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -99,7 +102,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -113,7 +116,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -137,7 +140,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./
@@ -164,7 +167,7 @@ workflows:
     before_run:
     - _clear_workdir
     steps:
-    - simple-git-clone:
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
         - repository_url: $SAMPLE_APP_URL
         - clone_into_dir: ./

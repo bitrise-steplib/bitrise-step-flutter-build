@@ -127,6 +127,30 @@ workflows:
               exit 1
             fi
 
+  test_additional_build_params_ios:
+    before_run:
+    - _clear_workdir
+    steps:
+    - script:
+        title: Clone sample app
+        inputs:
+        - content: git clone $SAMPLE_APP_URL .
+    - path::./:
+        inputs:
+        - additional_build_params: "--build-number 123456789"
+        - platform: ios
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+            plutil -convert xml1 $BITRISE_APP_DIR_PATH/Info.plist
+            grep -e "123456789" $BITRISE_APP_DIR_PATH/Info.plist
+            if [ $? -eq 1 ]; then
+              echo "Build number 123456789 was not found in Info.plist."
+              exit 1
+            fi
+
   test_cache:
     envs:
     - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache.tar.gz

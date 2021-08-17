@@ -6,7 +6,6 @@ app:
   - SAMPLE_APP_URL: https://github.com/bitrise-samples/sample-apps-flutter-ios-android.git
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
-  
 workflows:
   ci:
     before_run:
@@ -47,7 +46,7 @@ workflows:
         inputs:
         - content: git clone $SAMPLE_APP_URL .
     - path::./:
-        inputs: 
+        inputs:
         - is_debug_mode: "true"
         - platform: ios
 
@@ -60,9 +59,10 @@ workflows:
         inputs:
         - content: git clone $SAMPLE_APP_URL .
     - path::./:
-        inputs: 
+        inputs:
         - is_debug_mode: "true"
         - platform: android
+
   test_android_split_apk:
     before_run:
     - _clear_workdir
@@ -72,24 +72,24 @@ workflows:
         inputs:
         - content: git clone $SAMPLE_APP_URL .
     - path::./:
-        inputs: 
+        inputs:
         - android_additional_params: --release --split-per-abi
         - is_debug_mode: "true"
         - platform: android
 
   test_android_aab:
     before_run:
-      - _clear_workdir
+    - _clear_workdir
     steps:
-      - script:
-          title: Clone sample app
-          inputs:
-            - content: git clone $SAMPLE_APP_URL .
-      - path::./:
-          inputs:
-            - is_debug_mode: "true"
-            - platform: android
-            - android_output_type: appbundle
+    - script:
+        title: Clone sample app
+        inputs:
+        - content: git clone $SAMPLE_APP_URL .
+    - path::./:
+        inputs:
+        - is_debug_mode: "true"
+        - platform: android
+        - android_output_type: appbundle
 
   test_both:
     before_run:
@@ -101,7 +101,7 @@ workflows:
         - content: git clone $SAMPLE_APP_URL .
     - path::./:
         inputs:
-        - is_debug_mode: "true" 
+        - is_debug_mode: "true"
         - platform: both
 
 
@@ -114,17 +114,17 @@ workflows:
     - script:
         title: Clone sample app
         inputs:
-          - content: |-
-              git clone $SAMPLE_APP_URL .
+        - content: |-
+            git clone $SAMPLE_APP_URL .
     - script:
-        input:
+        inputs:
         - content: |-
             rm -rf $HOME/.pub-cache
     - cache-pull:
         run_if: true
     - path::./:
         inputs:
-        - is_debug_mode: "true" 
+        - is_debug_mode: "true"
         - platform: android
         - android_output_type: apk
         - android_additional_params: ''
@@ -132,19 +132,18 @@ workflows:
     - cache-push:
         run_if: true
     - script:
-        input:
+        inputs:
         - content: |-
             rm -rf $HOME/.pub-cache
     - cache-pull:
         run_if: true
     - path::./:
         inputs:
-        - is_debug_mode: "true" 
+        - is_debug_mode: "true"
         - platform: android
         - android_output_type: apk
         - android_additional_params: ''
         - cache_level: all
-          
 
   _clear_workdir:
     envs:

@@ -9,6 +9,28 @@ app:
 workflows:
   test_ios:
     before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ ${XCODE_MAJOR_VERSION} -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        inputs:
+        - workflow_id: utility_test_ios
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_ios:
+    before_run:
     - _setup_test
     steps:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
@@ -23,6 +45,28 @@ workflows:
 
   test_android_apk:
     before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ ${XCODE_MAJOR_VERSION} -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        inputs:
+        - workflow_id: utility_test_android_apk
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_android_apk:
+    before_run:
     - _setup_test
     steps:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
@@ -36,6 +80,28 @@ workflows:
         - platform: android
 
   test_android_split_apk:
+    before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ ${XCODE_MAJOR_VERSION} -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        inputs:
+        - workflow_id: utility_test_android_split_apk
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_android_split_apk:
     before_run:
     - _setup_test
     steps:
@@ -52,6 +118,28 @@ workflows:
 
   test_android_aab:
     before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ ${XCODE_MAJOR_VERSION} -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        inputs:
+        - workflow_id: utility_test_android_aab
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_android_aab:
+    before_run:
     - _setup_test
     steps:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
@@ -67,6 +155,28 @@ workflows:
 
   test_both:
     before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ ${XCODE_MAJOR_VERSION} -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        inputs:
+        - workflow_id: utility_test_both
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_both:
+    before_run:
     - _setup_test
     steps:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
@@ -80,6 +190,28 @@ workflows:
         - platform: both
 
   test_cache:
+    before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ ${XCODE_MAJOR_VERSION} -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        inputs:
+        - workflow_id: utility_test_cache
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_cache:
     envs:
     - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache.tar.gz
     before_run:
@@ -118,6 +250,28 @@ workflows:
         - android_output_type: apk
         - android_additional_params: ''
         - cache_level: all
+
+  _expose_xcode_version:
+    steps:
+    - script:
+        title: Expose Xcode major version
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+            if [[ ! -z "$XCODE_MAJOR_VERSION" ]]; then
+              echo "Xcode major version already exposed: $XCODE_MAJOR_VERSION"
+              exit 0
+            fi
+            version=`xcodebuild -version`
+            regex="Xcode ([0-9]*)."
+            if [[ ! $version =~ $regex ]]; then
+              echo "Failed to determine Xcode major version"
+              exit 1
+            fi
+            xcode_major_version=${BASH_REMATCH[1]}
+            echo "Xcode major version: $xcode_major_version"
+            envman add --key XCODE_MAJOR_VERSION --value $xcode_major_version
 
   _setup_test:
     steps:

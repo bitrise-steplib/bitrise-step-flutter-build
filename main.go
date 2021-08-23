@@ -34,6 +34,7 @@ var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
 var errCodeSign = errors.New("CODESIGN")
 
 type config struct {
+	AdditionalBuildParams   string              `env:"additional_build_params"`
 	IOSAdditionalParams     string              `env:"ios_additional_params"`
 	AndroidAdditionalParams string              `env:"android_additional_params"`
 	Platform                string              `env:"platform,opt[both,ios,android]"`
@@ -160,22 +161,24 @@ func main() {
 
 build:
 
-	for _, spec := range []buildSpecification{
+	buildSpecifications := []buildSpecification{
 		{
 			displayName:          "iOS",
 			platformCmdFlag:      "ios",
 			platformSelectors:    []string{"both", "ios"},
 			outputPathPatterns:   strings.Split(cfg.IOSExportPattern, "\n"),
-			additionalParameters: cfg.IOSAdditionalParams,
+			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.IOSAdditionalParams,
 		},
 		{
 			displayName:          "Android",
 			platformCmdFlag:      string(cfg.AndroidOutputType),
 			platformSelectors:    []string{"both", "android"},
 			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
-			additionalParameters: cfg.AndroidAdditionalParams,
+			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.AndroidAdditionalParams,
 		},
-	} {
+	}
+
+	for _, spec := range buildSpecifications {
 		if !spec.buildable(cfg.Platform) {
 			continue
 		}

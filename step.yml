@@ -73,6 +73,18 @@ inputs:
         - "both"
         - "ios"
         - "android"
+  - additional_build_params: ""
+    opts:
+      title: "Additional params for flutter build"
+      summary: "Additional params for flutter build"
+      description: |-
+        Additional params for flutter build.
+        
+        Example: you can specify a Build Number for `flutter build`
+        via the `--build-number` flutter build param.
+        For example, to set it to the `$BITRISE_BUILD_NUMBER` you can set this input
+        to: `--build-number=$BITRISE_BUILD_NUMBER`.
+      is_required: false
   - is_debug_mode: "false"
     opts:
       title: "Debug mode?"

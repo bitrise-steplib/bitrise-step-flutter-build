@@ -275,7 +275,7 @@ workflows:
 
   utility_test_additional_build_params_android:
     before_run:
-    - _clear_workdir
+    - _setup_test
     steps:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:
@@ -321,7 +321,7 @@ workflows:
 
   utility_test_additional_build_params_ios:
     before_run:
-    - _clear_workdir
+    - _setup_test
     steps:
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
         inputs:

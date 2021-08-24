@@ -289,3 +289,4 @@ workflows:
         - build_tools: 28.0.3
         - sdk_version: '28'
         - tools: 'on'
+    - flutter-installer:

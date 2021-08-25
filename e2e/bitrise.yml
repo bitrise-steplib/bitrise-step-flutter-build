@@ -299,10 +299,4 @@ workflows:
         inputs:
         - path: ${ORIGIN_SOURCE_DIR}/_tmp
         - is_create_path: true
-    - android-sdk-update:
-        inputs:
-        - platform_tools: stable
-        - build_tools: 28.0.3
-        - sdk_version: '28'
-        - tools: 'on'
     - flutter-installer:

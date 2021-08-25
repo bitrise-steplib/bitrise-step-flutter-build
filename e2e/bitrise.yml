@@ -269,6 +269,9 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
+                
+                yes | sdkmanager --install "build-tools;28.0.3"
+                
                 set -ex
                 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                   sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac

@@ -265,6 +265,25 @@ workflows:
   _setup_test:
     steps:
     - script:
+          run_if: $.IsCI
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                
+                yes | sdkmanager --install "build-tools;28.0.3"
+                
+                set -ex
+                if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                  sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+                  sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+                  export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+                  envman add --key JAVA_HOME --value "/usr/lib/jvm/java-11-openjdk-amd64"
+                elif [[ "$OSTYPE" == "darwin"* ]]; then
+                  jenv global 11
+                  export JAVA_HOME="$(jenv prefix)"
+                  envman add --key JAVA_HOME --value "$(jenv prefix)"
+                fi
+    - script:
         inputs:
         - content: |-
             #!/bin/bash
@@ -283,10 +302,4 @@ workflows:
         inputs:
         - path: ${ORIGIN_SOURCE_DIR}/_tmp
         - is_create_path: true
-    - android-sdk-update:
-        inputs:
-        - platform_tools: stable
-        - build_tools: 28.0.3
-        - sdk_version: '28'
-        - tools: 'on'
     - flutter-installer:

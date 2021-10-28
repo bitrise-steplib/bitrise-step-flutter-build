@@ -2,12 +2,12 @@ title: Flutter Build
 summary: Builds a Flutter project.
 description: |-
   This Step builds an iOS and an Android app. By default the Step builds the artifact based on the platform the scanner detects.
-  
+
   ### Configuring the Step
   1. In the **Project Location** input the root directory of your Flutter project is automatically filled out.
   2. Select which platform your project should be built for (`ios`, `android` or `both`).
   3. Enable **Debug** option to get verbose logs and see where the Step is failing.
-  
+
   Depending on the selected platform/s, continue with the rest of the config inputs.
 
   #### Configuring for an iOS app
@@ -27,7 +27,7 @@ description: |-
   ### Troubleshooting
 
   Make sure the **Flutter Install** Step is before the **Flutter Build** Step.
-  If you have not set up code signing correctly, some code signing related issue will definitely surface by this build Step. 
+  If you have not set up code signing correctly, some code signing related issue will definitely surface by this build Step.
   If you're unsure about code signing, consult our guide linked in Useful links.
 
   ### Useful links
@@ -44,9 +44,9 @@ source_code_url: https://github.com/bitrise-steplib/bitrise-step-flutter-build
 support_url: https://github.com/bitrise-steplib/bitrise-step-flutter-build/issues
 
 type_tags:
-  - build
+- build
 project_type_tags:
-  - flutter
+- flutter
 
 is_requires_admin_user: true
 is_always_run: false
@@ -57,138 +57,138 @@ toolkit:
     package_name: github.com/bitrise-steplib/bitrise-step-flutter-build
 
 inputs:
-  - project_location: "$BITRISE_SOURCE_DIR"
-    opts:
-      title: "Project Location"
-      summary: "The root dir of your Flutter project."
-      description: "The root dir of your Flutter project."
-      is_required: true
-  - platform: both
-    opts:
-      title: "Platform"
-      summary: "The selected platform will be built, or both iOS and Android if you select both"
-      description: "The selected platform will be built, or both iOs and Android if you select both"
-      is_required: true
-      value_options:
-        - "both"
-        - "ios"
-        - "android"
-  - additional_build_params: ""
-    opts:
-      title: "Additional params for flutter build"
-      summary: "Additional params for flutter build"
-      description: |-
-        Additional params for flutter build.
-        
-        Example: you can specify a Build Number for `flutter build`
-        via the `--build-number` flutter build param.
-        For example, to set it to the `$BITRISE_BUILD_NUMBER` you can set this input
-        to: `--build-number=$BITRISE_BUILD_NUMBER`.
-      is_required: false
-  - is_debug_mode: "false"
-    opts:
-      title: "Debug mode?"
-      summary: "If debug mode is enabled, the step will print verbose logs"
-      description: |-
-        If debug mode is enabled, the step will print verbose logs
-      is_required: true
-      value_options:
-      - "true"
-      - "false"
-  - cache_level: "all"
-    opts:
-      title: "Build cache"
-      summary: "Enable or disable caching"
-      description: |-
-        If enabled, will cache:
-        - pub packages
-        - Android (gradle) cache
-        - Carthage / Cocoapods dependencies
-      is_required: true
-      value_options:
-        - "all"
-        - "none"
-  - ios_codesign_identity: 
-    opts:
-      category: "iOS Platform Configs"
-      title: "Codesign Identity"
-      summary: "Override codesign identity in .flutter_settings"
-      description: "Override codesign identity in .flutter_settings"
-  - ios_additional_params: "--release --no-codesign"
-    opts:
-      category: "iOS Platform Configs"
-      title: "Additional parameters"
-      summary: "The flags from this input field will be appended to the `flutter build ios` command."
-      description: "The flags from this input field will be appended to the `flutter build ios` command."
-  - ios_output_pattern: "*build/ios/iphoneos/*.app"
-    opts:
-      category: "iOS Platform Configs"
-      title: "Output pattern"
-      summary: Pattern to find built artifacts relative to $BITRISE\_SOURCE\_DIR
-      description: |-
-        Separate patterns with a newline.
-      is_required: true
-  - android_output_type: "apk"
-    opts:
-      category: "Android Platform Configs"
-      title: "Android output artifact type"
-      summary: "The selected output type will be build, either APK or app bundle (AAB)"
-      description: "The selected output type will be build, either APK or app bundle (AAB)"
-      is_required: true
-      value_options:
-        - "apk"
-        - "appbundle"
-  - android_additional_params: "--release"
-    opts:
-      category: "Android Platform Configs"
-      title: "Additional parameters"
-      summary: "The flags from this input field will be appended to the `flutter build apk` command."
-      description: "The flags from this input field will be appended to the `flutter build apk` command."
-  - android_output_pattern: |-
-      *build/app/outputs/apk/*/*.apk
-      *build/app/outputs/bundle/*/*.aab
-    opts:
-      category: "Android Platform Configs"
-      title: "Output (.apk, .aab) pattern"
-      summary: Pattern to find built APK or AAB artifacts relative to $BITRISE\_SOURCE\_DIR
-      description: |
-        Will find the APK or AAB files - `depending on the build type input` - with the given pattern.<br/>
-        Separate patterns with a newline.
-        **Note**<br/>
-        The step will export only the selected artifact type - `Android output artifact type` - even if the filter would accept other artifact types as well.
-      is_required: true
-  - android_bundle_output_pattern: "*build/app/outputs/bundle/*/*.aab"
-    opts:	    
-      category: "Deprecated"
-      title: "[DEPRECATED] App bundle output pattern"	
-      summary: "Pattern to find built AAB artifacts relative to `$BITRISE_SOURCE_DIR`. Deprecated, use `android_output_pattern` instead."
-      description: "Pattern to find built AAB artifacts relative to `$BITRISE_SOURCE_DIR`"
+- project_location: $BITRISE_SOURCE_DIR
+  opts:
+    title: Project Location
+    summary: The root dir of your Flutter project.
+    description: The root dir of your Flutter project.
+    is_required: true
+- platform: both
+  opts:
+    title: Platform
+    summary: The selected platform will be built, or both iOS and Android if you select both
+    description: The selected platform will be built, or both iOs and Android if you select both
+    is_required: true
+    value_options:
+    - both
+    - ios
+    - android
+- additional_build_params: ""
+  opts:
+    title: Additional params for flutter build
+    summary: Additional params for flutter build
+    description: |-
+      Additional params for flutter build.
+
+      Example: you can specify a Build Number for `flutter build`
+      via the `--build-number` flutter build param.
+      For example, to set it to the `$BITRISE_BUILD_NUMBER` you can set this input
+      to: `--build-number=$BITRISE_BUILD_NUMBER`.
+    is_required: false
+- is_debug_mode: "false"
+  opts:
+    title: Debug mode?
+    summary: If debug mode is enabled, the step will print verbose logs
+    description: |-
+      If debug mode is enabled, the step will print verbose logs
+    is_required: true
+    value_options:
+    - "true"
+    - "false"
+- cache_level: all
+  opts:
+    title: Build cache
+    summary: Enable or disable caching
+    description: |-
+      If enabled, will cache:
+      - pub packages
+      - Android (gradle) cache
+      - Carthage / Cocoapods dependencies
+    is_required: true
+    value_options:
+    - all
+    - none
+- ios_codesign_identity:
+  opts:
+    category: iOS Platform Configs
+    title: Codesign Identity
+    summary: Override codesign identity in .flutter_settings
+    description: Override codesign identity in .flutter_settings
+- ios_additional_params: --release --no-codesign
+  opts:
+    category: iOS Platform Configs
+    title: Additional parameters
+    summary: The flags from this input field will be appended to the `flutter build ios` command.
+    description: The flags from this input field will be appended to the `flutter build ios` command.
+- ios_output_pattern: "*build/ios/iphoneos/*.app"
+  opts:
+    category: iOS Platform Configs
+    title: Output pattern
+    summary: Pattern to find built artifacts relative to $BITRISE\_SOURCE\_DIR
+    description: |-
+      Separate patterns with a newline.
+    is_required: true
+- android_output_type: apk
+  opts:
+    category: Android Platform Configs
+    title: Android output artifact type
+    summary: The selected output type will be build, either APK or app bundle (AAB)
+    description: The selected output type will be build, either APK or app bundle (AAB)
+    is_required: true
+    value_options:
+    - apk
+    - appbundle
+- android_additional_params: --release
+  opts:
+    category: Android Platform Configs
+    title: Additional parameters
+    summary: The flags from this input field will be appended to the `flutter build apk` command.
+    description: The flags from this input field will be appended to the `flutter build apk` command.
+- android_output_pattern: |-
+    *build/app/outputs/apk/*/*.apk
+    *build/app/outputs/bundle/*/*.aab
+  opts:
+    category: Android Platform Configs
+    title: Output (.apk, .aab) pattern
+    summary: Pattern to find built APK or AAB artifacts relative to $BITRISE\_SOURCE\_DIR
+    description: |
+      Will find the APK or AAB files - `depending on the build type input` - with the given pattern.<br/>
+      Separate patterns with a newline.
+      **Note**<br/>
+      The step will export only the selected artifact type - `Android output artifact type` - even if the filter would accept other artifact types as well.
+    is_required: true
+- android_bundle_output_pattern: "*build/app/outputs/bundle/*/*.aab"
+  opts:
+    category: Deprecated
+    title: "[DEPRECATED] App bundle output pattern"
+    summary: Pattern to find built AAB artifacts relative to `$BITRISE_SOURCE_DIR`. Deprecated, use `android_output_pattern` instead.
+    description: Pattern to find built AAB artifacts relative to `$BITRISE_SOURCE_DIR`
 
 
 outputs:
-  - BITRISE_APK_PATH:
-    opts:
-      title: The created .apk file's path
-  - BITRISE_APK_PATH_LIST:
-    opts:
-      title: All created .apk file's path list
-  - BITRISE_APP_DIR_PATH:
-    opts:
-      title: The generated .app directory
-  - BITRISE_AAB_PATH_LIST:
-    opts:
-      title: "List of the generated AAB file paths"
-      summary: "List of the generated (and copied) AAB file paths - after filtering."
-      description: |-
-        This output will include the paths of the generated AAB files,
-        after filtering based on the filter inputs.
-        The paths are separated with `|` character, eg: `app.aab|app2.aab`
-  - BITRISE_AAB_PATH:
-    opts:
-      title: "Path of the generated AAB"
-      summary: "Path of the generated (and copied) AAB file - after filtering."
-      description: |-
-        This output will include the path of the generated AAB file,
-        after filtering based on the filter inputs.
-        If the build generates more than one AAB file which fulfills the
-        filter inputs this output will contain the last one's path.
+- BITRISE_APK_PATH:
+  opts:
+    title: The created .apk file's path
+- BITRISE_APK_PATH_LIST:
+  opts:
+    title: All created .apk file's path list
+- BITRISE_APP_DIR_PATH:
+  opts:
+    title: The generated .app directory
+- BITRISE_AAB_PATH_LIST:
+  opts:
+    title: List of the generated AAB file paths
+    summary: List of the generated (and copied) AAB file paths - after filtering.
+    description: |-
+      This output will include the paths of the generated AAB files,
+      after filtering based on the filter inputs.
+      The paths are separated with `|` character, eg: `app.aab|app2.aab`
+- BITRISE_AAB_PATH:
+  opts:
+    title: Path of the generated AAB
+    summary: Path of the generated (and copied) AAB file - after filtering.
+    description: |-
+      This output will include the path of the generated AAB file,
+      after filtering based on the filter inputs.
+      If the build generates more than one AAB file which fulfills the
+      filter inputs this output will contain the last one's path.

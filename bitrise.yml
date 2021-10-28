@@ -30,7 +30,7 @@ workflows:
 
   check:
     steps:
-    - git::https://github.com/bitrise-steplib/steps-check.git:
+    - git::https://github.com/bitrise-steplib/steps-check.git: { }
 
   e2e:
     steps:
@@ -40,4 +40,4 @@ workflows:
 
   generate-readme:
     steps:
-    - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main:
+    - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main: { }

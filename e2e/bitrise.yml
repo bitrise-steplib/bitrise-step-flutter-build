@@ -24,7 +24,8 @@ workflows:
 
             envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
     - bitrise-run:
-        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        run_if: |-
+          {{ enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true" }}
         inputs:
         - workflow_id: utility_test_ios
         - bitrise_config_path: ./e2e/bitrise.yml
@@ -104,7 +105,8 @@ workflows:
 
             envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
     - bitrise-run:
-        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        run_if: |-
+          {{ enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true" }}
         inputs:
         - workflow_id: utility_test_both
         - bitrise_config_path: ./e2e/bitrise.yml
@@ -139,28 +141,28 @@ workflows:
         - content: |-
             rm -rf $HOME/.pub-cache
     - cache-pull:
-        run_if: true
+        run_if: "true"
     - path::./:
         inputs:
         - is_debug_mode: "true"
         - platform: android
         - android_output_type: apk
-        - android_additional_params: ''
+        - android_additional_params: ""
         - cache_level: all
     - cache-push:
-        run_if: true
+        run_if: "true"
     - script:
         inputs:
         - content: |-
             rm -rf $HOME/.pub-cache
     - cache-pull:
-        run_if: true
+        run_if: "true"
     - path::./:
         inputs:
         - is_debug_mode: "true"
         - platform: android
         - android_output_type: apk
-        - android_additional_params: ''
+        - android_additional_params: ""
         - cache_level: all
 
   test_additional_build_params_android:
@@ -174,7 +176,7 @@ workflows:
         - branch: master
     - path::./:
         inputs:
-        - additional_build_params: "--split-per-abi"
+        - additional_build_params: --split-per-abi
         - platform: android
     - script:
         inputs:
@@ -204,7 +206,8 @@ workflows:
 
             envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
     - bitrise-run:
-        run_if: '{{enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true"}}'
+        run_if: |-
+          {{ enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true" }}
         inputs:
         - workflow_id: utility_test_additional_build_params_ios
         - bitrise_config_path: ./e2e/bitrise.yml
@@ -220,7 +223,7 @@ workflows:
         - branch: master
     - path::./:
         inputs:
-        - additional_build_params: "--build-number 123456789"
+        - additional_build_params: --build-number 123456789
         - platform: ios
     - script:
         inputs:
@@ -265,24 +268,24 @@ workflows:
   _setup_test:
     steps:
     - script:
-          run_if: $.IsCI
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                
-                yes | sdkmanager --install "build-tools;28.0.3"
-                
-                set -ex
-                if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-                  sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
-                  sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
-                  export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
-                  envman add --key JAVA_HOME --value "/usr/lib/jvm/java-11-openjdk-amd64"
-                elif [[ "$OSTYPE" == "darwin"* ]]; then
-                  jenv global 11
-                  export JAVA_HOME="$(jenv prefix)"
-                  envman add --key JAVA_HOME --value "$(jenv prefix)"
-                fi
+        run_if: $.IsCI
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            yes | sdkmanager --install "build-tools;28.0.3"
+
+            set -ex
+            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+              sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+              sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+              export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+              envman add --key JAVA_HOME --value "/usr/lib/jvm/java-11-openjdk-amd64"
+            elif [[ "$OSTYPE" == "darwin"* ]]; then
+              jenv global 11
+              export JAVA_HOME="$(jenv prefix)"
+              envman add --key JAVA_HOME --value "$(jenv prefix)"
+            fi
     - script:
         inputs:
         - content: |-
@@ -298,8 +301,8 @@ workflows:
           files with just './some-file' in the step's code, which would
           work for testing the step from this directory directly
           but would break if the step is included in another `bitrise.yml`.
-        run_if: true
+        run_if: "true"
         inputs:
         - path: ${ORIGIN_SOURCE_DIR}/_tmp
         - is_create_path: true
-    - flutter-installer:
+    - flutter-installer: { }

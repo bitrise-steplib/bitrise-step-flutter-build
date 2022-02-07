@@ -327,4 +327,3 @@ workflows:
     - flutter-installer:
         inputs:
         - version: stable
-        -

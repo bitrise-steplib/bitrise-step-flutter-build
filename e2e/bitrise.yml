@@ -207,12 +207,12 @@ workflows:
         - content: |-
             #!/bin/bash
             set -eo pipefail
-            
+
             if [[ $XCODE_AVAILABLE == false ]] || [[ $XCODE_MAJOR_VERSION -lt 11 ]]; then
               echo "This test case requires Xcode >= 11, skipping..."
               exit 0
             fi
-            
+
             envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
     - bitrise-run:
         run_if: |-

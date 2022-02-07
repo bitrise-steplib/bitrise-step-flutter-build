@@ -4,10 +4,80 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - SAMPLE_APP_URL: https://github.com/ofalvai/Bitrise-Flutter-Sample.git  # TODO
-  - SAMPLE_APP_BRANCH: main
+  - SAMPLE_APP_BRANCH: android-update  # TODO
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
+  # secrets
+  - BITRISE_KEYCHAIN_PATH: $BITRISE_KEYCHAIN_PATH
+  - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
+  - BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
+  - BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+  - BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST: $BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST
+
+
 workflows:
+  test_ios_archive:
+    before_run:
+    - _expose_xcode_version
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            if [[ $XCODE_AVAILABLE == false ]] || [[ $XCODE_MAJOR_VERSION -lt 11 ]]; then
+              echo "This test case requires Xcode >= 11, skipping..."
+              exit 0
+            fi
+
+            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
+    - bitrise-run:
+        run_if: |-
+          {{ enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true" }}
+        inputs:
+        - workflow_id: utility_test_ios_archive
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_ios_archive:
+    before_run:
+    - _setup_test
+    steps:
+    - certificate-and-profile-installer:
+        inputs:
+        - certificate_url: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
+        - certificate_passphrase: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+        - provisioning_profile_url: $BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST
+        - install_defaults: "no"
+        - keychain_path: $BITRISE_KEYCHAIN_PATH
+        - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
+    - path::./:
+        inputs:
+        - platform: ios
+        - ios_output_type: archive
+    - git::https://github.com/bitrise-steplib/bitrise-step-check-step-outputs.git@main:
+        title: Check step outputs
+        inputs:
+        - envs:
+        - files:
+        - dirs: |-
+            BITRISE_XCARCHIVE_PATH
+        - deploy_dir: $BITRISE_DEPLOY_DIR
+        - deployed_files: |-
+            BITRISE_XCARCHIVE_ZIP_PATH
+        - deployed_dirs:
+    - script:
+        title: Check exported xcarchive zip
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+
+            if [ ! -f $BITRISE_DEPLOY_DIR/Runner.xcarchive.zip ]; then
+              echo "$BITRISE_DEPLOY_DIR/Runner.xcarchive.zip doesn't exist"
+              exit 1
+            fi
+
   test_ios:
     before_run:
     - _expose_xcode_version
@@ -198,60 +268,6 @@ workflows:
               exit 1
             fi
 
-  test_ios_archive:
-    before_run:
-    - _expose_xcode_version
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -eo pipefail
-
-            if [[ $XCODE_AVAILABLE == false ]] || [[ $XCODE_MAJOR_VERSION -lt 11 ]]; then
-              echo "This test case requires Xcode >= 11, skipping..."
-              exit 0
-            fi
-
-            envman add --key XCODE_MAJOR_VERSION_AT_LEAST_11 --value "true"
-    - bitrise-run:
-        run_if: |-
-          {{ enveq "XCODE_MAJOR_VERSION_AT_LEAST_11" "true" }}
-        inputs:
-        - workflow_id: utility_test_ios_archive
-        - bitrise_config_path: ./e2e/bitrise.yml
-
-  utility_test_ios_archive:
-    before_run:
-    - _setup_test
-    steps:
-    - path::./:
-        inputs:
-        - platform: ios
-        - ios_output_type: archive
-    - git::https://github.com/bitrise-steplib/bitrise-step-check-step-outputs.git@main:
-        title: Check step outputs
-        inputs:
-        - envs:
-        - files:
-        - dirs: |-
-            BITRISE_XCARCHIVE_PATH
-        - deploy_dir: $BITRISE_DEPLOY_DIR
-        - deployed_files: |-
-            BITRISE_XCARCHIVE_ZIP_PATH
-        - deployed_dirs:
-    - script:
-        title: Check exported xcarchive zip
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-
-            if [ ! -f $BITRISE_DEPLOY_DIR/Runner.xcarchive.zip ]; then
-              echo "$BITRISE_DEPLOY_DIR/Runner.xcarchive.zip doesn't exist"
-              exit 1
-            fi
-
   _expose_xcode_version:
     steps:
     - script:
@@ -311,3 +327,4 @@ workflows:
     - flutter-installer:
         inputs:
         - version: stable
+        -

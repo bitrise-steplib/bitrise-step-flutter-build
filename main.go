@@ -50,7 +50,7 @@ type config struct {
 	AndroidExportPattern    string     `env:"android_output_pattern,required"`
 
 	// Deprecated
-	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"` // TODO: remove?
+	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
 }
 
 func failf(msg string, args ...interface{}) {

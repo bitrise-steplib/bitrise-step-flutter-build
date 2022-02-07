@@ -3,7 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - SAMPLE_APP_URL: https://github.com/ofalvai/Bitrise-Flutter-Sample.git # TODO
+  - SAMPLE_APP_URL: https://github.com/ofalvai/Bitrise-Flutter-Sample.git  # TODO
   - SAMPLE_APP_BRANCH: main
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
@@ -204,8 +204,8 @@ workflows:
     steps:
     - path::./:
         inputs:
-          - platform: ios
-          - ios_output_type: archive
+        - platform: ios
+        - ios_output_type: archive
     - git::https://github.com/bitrise-steplib/bitrise-step-check-step-outputs.git@main:
         title: Check step outputs
         inputs:
@@ -223,7 +223,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-            
+
             if [ ! -f $BITRISE_DEPLOY_DIR/Runner.xcarchive.zip ]; then
               echo "$BITRISE_DEPLOY_DIR/Runner.xcarchive.zip doesn't exist"
               exit 1

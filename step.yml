@@ -119,8 +119,8 @@ inputs:
       - `archive`: Build an iOS archive bundle via `flutter build ipa`
     is_required: true
     value_options:
-      - app
-      - archive
+    - app
+    - archive
 - ios_codesign_identity:
   opts:
     category: iOS Platform Configs

@@ -108,19 +108,34 @@ inputs:
     value_options:
     - all
     - none
+- ios_output_type: app
+  opts:
+    category: iOS Platform Configs
+    title: iOS output artifact type
+    summary: Output type to build when building for iOS
+    description: |-
+      Output type to build when building for iOS. Possible values:
+      - `app`: Build an iOS application bundle via `flutter build ios`
+      - `archive`: Build an iOS archive bundle via `flutter build ipa`
+    is_required: true
+    value_options:
+    - app
+    - archive
 - ios_codesign_identity:
   opts:
     category: iOS Platform Configs
     title: Codesign Identity
     summary: Override codesign identity in .flutter_settings
     description: Override codesign identity in .flutter_settings
-- ios_additional_params: --release --no-codesign
+- ios_additional_params: --release
   opts:
     category: iOS Platform Configs
     title: Additional parameters
-    summary: The flags from this input field will be appended to the `flutter build ios` command.
+    summary: The flags from this input field will be appended to the `flutter build ios` or `flutter build ipa` command.
     description: The flags from this input field will be appended to the `flutter build ios` command.
-- ios_output_pattern: "*build/ios/iphoneos/*.app"
+- ios_output_pattern: |-
+    *build/ios/iphoneos/*.app
+    *build/ios/archive/*.xcarchive
   opts:
     category: iOS Platform Configs
     title: Output pattern
@@ -174,7 +189,13 @@ outputs:
     title: All created .apk file's path list
 - BITRISE_APP_DIR_PATH:
   opts:
-    title: The generated .app directory
+    title: The generated `.app` directory
+- BITRISE_XCARCHIVE_PATH:
+  opts:
+    title: The generated `.xcarchive` directory
+- BITRISE_XCARCHIVE_ZIP_PATH:
+  opts:
+    title: The generated `.xcarchive` directory compressed as a ZIP archive
 - BITRISE_AAB_PATH_LIST:
   opts:
     title: List of the generated AAB file paths

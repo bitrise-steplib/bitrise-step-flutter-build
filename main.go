@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/fileutil"
@@ -17,37 +16,40 @@ import (
 	shellquote "github.com/kballard/go-shellquote"
 )
 
-// AndroidArtifactType is an enum
-// **APK** or **AppBundle**
-type AndroidArtifactType string
+type OutputType string
 
-// const ...
 const (
 	codesignField  = "ios-signing-cert"
 	noCodesignFlag = "--no-codesign"
 
-	APK       AndroidArtifactType = "apk"
-	AppBundle AndroidArtifactType = "appbundle"
+	OutputTypeAPK       OutputType = "apk"
+	OutputTypeAppBundle OutputType = "appbundle"
+
+	OutputTypeIOSApp  OutputType = "app"     // CLI: flutter build ios
+	OutputTypeArchive OutputType = "archive" // CLI: flutter build ipa
 )
 
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
 var errCodeSign = errors.New("CODESIGN")
 
 type config struct {
-	AdditionalBuildParams   string              `env:"additional_build_params"`
-	IOSAdditionalParams     string              `env:"ios_additional_params"`
-	AndroidAdditionalParams string              `env:"android_additional_params"`
-	Platform                string              `env:"platform,opt[both,ios,android]"`
-	IOSExportPattern        string              `env:"ios_output_pattern,required"`
-	AndroidOutputType       AndroidArtifactType `env:"android_output_type,opt[apk,appbundle]"`
-	AndroidExportPattern    string              `env:"android_output_pattern,required"`
-	IOSCodesignIdentity     string              `env:"ios_codesign_identity"`
-	ProjectLocation         string              `env:"project_location,dir"`
-	DebugMode               bool                `env:"is_debug_mode,opt[true,false]"`
-	CacheLevel              string              `env:"cache_level,opt[all,none]"`
+	ProjectLocation       string `env:"project_location,dir"`
+	Platform              string `env:"platform,opt[both,ios,android]"`
+	AdditionalBuildParams string `env:"additional_build_params"`
+	DebugMode             bool   `env:"is_debug_mode,opt[true,false]"`
+	CacheLevel            string `env:"cache_level,opt[all,none]"`
+
+	IOSOutputType       OutputType `env:"ios_output_type,opt[app,archive]"`
+	IOSAdditionalParams string     `env:"ios_additional_params"`
+	IOSExportPattern    []string   `env:"ios_output_pattern,multiline"`
+	IOSCodesignIdentity string     `env:"ios_codesign_identity"`
+
+	AndroidOutputType       OutputType `env:"android_output_type,opt[apk,appbundle]"`
+	AndroidAdditionalParams string     `env:"android_additional_params"`
+	AndroidExportPattern    []string   `env:"android_output_pattern,multiline"`
 
 	// Deprecated
-	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
+	AndroidBundleExportPattern []string `env:"android_bundle_output_pattern,multiline"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -56,7 +58,7 @@ func failf(msg string, args ...interface{}) {
 }
 
 func handleDeprecatedInputs(cfg *config) {
-	if cfg.AndroidBundleExportPattern != "" && cfg.AndroidBundleExportPattern != "*build/app/outputs/bundle/*/*.aab" {
+	if len(cfg.AndroidBundleExportPattern) > 0 && cfg.AndroidBundleExportPattern[0] != "*build/app/outputs/bundle/*/*.aab" {
 		log.Warnf("step input 'App bundle output pattern' (android_bundle_output_pattern) is deprecated and will be removed on 20 November 2019, use 'Output (.apk, .aab) pattern' (android_output_pattern) instead!")
 		log.Printf("Using 'App bundle output pattern' (android_bundle_output_pattern) instead of 'Output (.apk, .aab) pattern' (android_output_pattern).")
 		log.Printf("If you don't want to use 'App bundle output pattern' (android_bundle_output_pattern), empty it's value.")
@@ -96,6 +98,10 @@ func main() {
 		}
 		if sliceutil.IsStringInSlice(noCodesignFlag, iosParams) {
 			log.Printf(" - Skipping codesign preparation, %s parameter set", noCodesignFlag)
+			goto build
+		}
+		if cfg.IOSOutputType == OutputTypeIOSApp {
+			log.Printf(" - Skipping codesign preparation because output type is iOS app, not xcarchive")
 			goto build
 		}
 
@@ -163,17 +169,17 @@ build:
 
 	buildSpecifications := []buildSpecification{
 		{
-			displayName:          "iOS",
-			platformCmdFlag:      "ios",
+			displayName:          "iOS app",
+			platformOutputType:   cfg.IOSOutputType,
 			platformSelectors:    []string{"both", "ios"},
-			outputPathPatterns:   strings.Split(cfg.IOSExportPattern, "\n"),
+			outputPathPatterns:   cfg.IOSExportPattern,
 			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.IOSAdditionalParams,
 		},
 		{
-			displayName:          "Android",
-			platformCmdFlag:      string(cfg.AndroidOutputType),
+			displayName:          "Android app",
+			platformOutputType:   cfg.AndroidOutputType,
 			platformSelectors:    []string{"both", "android"},
-			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
+			outputPathPatterns:   cfg.AndroidExportPattern,
 			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.AndroidAdditionalParams,
 		},
 	}
@@ -205,7 +211,7 @@ build:
 		var artifacts []string
 		var err error
 
-		if spec.platformCmdFlag == "apk" || spec.platformCmdFlag == "appbundle" {
+		if spec.platformOutputType == OutputTypeAPK || spec.platformOutputType == OutputTypeAppBundle {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, false)
 		} else {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, true)

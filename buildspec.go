@@ -21,7 +21,7 @@ import (
 
 type buildSpecification struct {
 	displayName          string
-	platformCmdFlag      string
+	platformOutputType   OutputType
 	platformSelectors    []string
 	outputPathPatterns   []string
 	additionalParameters string
@@ -30,15 +30,17 @@ type buildSpecification struct {
 
 func (spec buildSpecification) exportArtifacts(artifacts []string) error {
 	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
-	switch spec.platformCmdFlag {
-	case "apk":
-		return spec.exportAndroidArtifacts(APK, artifacts, deployDir)
-	case "appbundle":
-		return spec.exportAndroidArtifacts(AppBundle, artifacts, deployDir)
-	case "ios":
+	switch spec.platformOutputType {
+	case OutputTypeAPK:
+		return spec.exportAndroidArtifacts(OutputTypeAPK, artifacts, deployDir)
+	case OutputTypeAppBundle:
+		return spec.exportAndroidArtifacts(OutputTypeAppBundle, artifacts, deployDir)
+	case OutputTypeIOSApp:
 		return spec.exportIOSApp(artifacts, deployDir)
+	case OutputTypeArchive:
+		return spec.exportIOSArchive(artifacts, deployDir)
 	default:
-		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbundle, ios", spec.platformCmdFlag)
+		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbundle, app, archive", spec.platformOutputType)
 	}
 }
 
@@ -55,10 +57,6 @@ func (spec buildSpecification) artifactPaths(outputPathPatterns []string, isDir 
 }
 
 func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string) error {
-	if len(artifacts) < 1 {
-		return fmt.Errorf("- No artifacts found")
-	}
-
 	artifact := artifacts[len(artifacts)-1]
 	fileName := filepath.Base(artifact)
 
@@ -79,16 +77,39 @@ func (spec buildSpecification) exportIOSApp(artifacts []string, deployDir string
 	return nil
 }
 
-func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidArtifactType, artifacts []string, deployDir string) error {
-	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
+func (spec buildSpecification) exportIOSArchive(artifacts []string, deployDir string) error {
+	artifact := artifacts[len(artifacts)-1]
+	fileName := filepath.Base(artifact)
 
-	if len(artifacts) < 1 {
-		return fmt.Errorf("artifact list did not contain any artifacts of type %s", androidOutputType)
+	if len(artifacts) > 1 {
+		log.Warnf("- Multiple artifacts found: %v, exporting %s", artifacts, artifact)
 	}
+
+	zipPath := filepath.Join(deployDir, fileName+".zip")
+	if err := ziputil.ZipDir(artifact, zipPath, false); err != nil {
+		return err
+	}
+	log.Donef("- $BITRISE_DEPLOY_DIR/" + fileName + ".zip")
+
+	if err := tools.ExportEnvironmentWithEnvman("BITRISE_XCARCHIVE_PATH", artifact); err != nil {
+		return err
+	}
+	log.Donef("- $BITRISE_XCARCHIVE_PATH: " + artifact)
+
+	if err := tools.ExportEnvironmentWithEnvman("BITRISE_XCARCHIVE_ZIP_PATH", zipPath); err != nil {
+		return err
+	}
+	log.Donef("- BITRISE_XCARCHIVE_ZIP_PATH: " + zipPath)
+
+	return nil
+}
+
+func (spec buildSpecification) exportAndroidArtifacts(androidOutputType OutputType, artifacts []string, deployDir string) error {
+	artifacts = filterAndroidArtifactsBy(androidOutputType, artifacts)
 
 	var singleFileOutputEnvName string
 	var multipleFileOutputEnvName string
-	switch spec.platformCmdFlag {
+	switch spec.platformOutputType {
 	case "appbundle":
 		singleFileOutputEnvName = "BITRISE_AAB_PATH"
 		multipleFileOutputEnvName = "BITRISE_AAB_PATH_LIST"
@@ -120,18 +141,18 @@ func (spec buildSpecification) exportAndroidArtifacts(androidOutputType AndroidA
 	return nil
 }
 
-func filterAndroidArtifactsBy(androidOutputType AndroidArtifactType, artifacts []string) []string {
+func filterAndroidArtifactsBy(androidOutputType OutputType, artifacts []string) []string {
 	var index int
 	for _, artifact := range artifacts {
 		switch androidOutputType {
-		case APK:
+		case OutputTypeAPK:
 			if path.Ext(artifact) != ".apk" {
-				log.Debugf("Arfifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
+				log.Debugf("Artifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
 				continue // drop artifact
 			}
-		case AppBundle:
+		case OutputTypeAppBundle:
 			if path.Ext(artifact) != ".aab" {
-				log.Debugf("Arfifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
+				log.Debugf("Artifact (%s) found by output patterns, but it's not the selected output type (%s) - Skip", artifact, androidOutputType)
 				continue // drop artifact
 			}
 		}
@@ -173,9 +194,23 @@ func (spec buildSpecification) build(params string) error {
 	var errorWriter io.Writer = os.Stderr
 	var errBuffer bytes.Buffer
 
-	buildCmd := command.New("flutter", append([]string{"build", spec.platformCmdFlag}, paramSlice...)...).SetStdout(os.Stdout)
+	var platformCmd string
+	switch spec.platformOutputType {
+	case OutputTypeIOSApp:
+		platformCmd = "ios" // $ flutter build ios -> .app output
+	case OutputTypeArchive:
+		platformCmd = "ipa" // $ flutter build ipa -> .xcarchive output
+	default:
+		platformCmd = string(spec.platformOutputType)
+	}
 
-	if spec.platformCmdFlag == "ios" {
+	if spec.platformOutputType == OutputTypeIOSApp {
+		paramSlice = append(paramSlice, "--no-codesign")
+	}
+
+	buildCmd := command.New("flutter", append([]string{"build", platformCmd}, paramSlice...)...).SetStdout(os.Stdout)
+
+	if spec.platformOutputType == OutputTypeIOSApp || spec.platformOutputType == OutputTypeArchive {
 		buildCmd.SetStdin(strings.NewReader("a")) // if the CLI asks to input the selected identity we force it to be aborted
 		errorWriter = io.MultiWriter(os.Stderr, &errBuffer)
 	}
@@ -190,7 +225,7 @@ func (spec buildSpecification) build(params string) error {
 
 	err = buildCmd.Run()
 
-	if spec.platformCmdFlag == "ios" {
+	if spec.platformOutputType == OutputTypeIOSApp {
 		if strings.Contains(strings.ToLower(errBuffer.String()), "code signing is required") {
 			return errCodeSign
 		}

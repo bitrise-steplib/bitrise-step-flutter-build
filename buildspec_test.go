@@ -8,13 +8,13 @@ import (
 func Test_filterAndroidArtifactsBy(t *testing.T) {
 	tests := []struct {
 		name              string
-		androidOutputType AndroidArtifactType
+		androidOutputType OutputType
 		artifacts         []string
 		want              []string
 	}{
 		{
 			name:              "Filter APK",
-			androidOutputType: APK,
+			androidOutputType: OutputTypeAPK,
 			artifacts: []string{
 				"test.apk",
 				"test_2.apk",
@@ -27,7 +27,7 @@ func Test_filterAndroidArtifactsBy(t *testing.T) {
 		},
 		{
 			name:              "Filter AAB",
-			androidOutputType: AppBundle,
+			androidOutputType: OutputTypeAppBundle,
 			artifacts: []string{
 				"test.apk",
 				"test_2.apk",

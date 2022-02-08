@@ -3,8 +3,8 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - SAMPLE_APP_URL: https://github.com/ofalvai/Bitrise-Flutter-Sample.git  # TODO
-  - SAMPLE_APP_BRANCH: android-update  # TODO
+  - SAMPLE_APP_URL: https://github.com/bitrise-io/Bitrise-Flutter-Sample.git
+  - SAMPLE_APP_BRANCH: main
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
   # secrets

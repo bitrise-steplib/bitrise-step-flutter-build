@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/fileutil"
@@ -42,15 +41,15 @@ type config struct {
 
 	IOSOutputType       OutputType `env:"ios_output_type,opt[app,archive]"`
 	IOSAdditionalParams string     `env:"ios_additional_params"`
-	IOSExportPattern    string     `env:"ios_output_pattern,required"`
+	IOSExportPattern    []string   `env:"ios_output_pattern,multiline"`
 	IOSCodesignIdentity string     `env:"ios_codesign_identity"`
 
 	AndroidOutputType       OutputType `env:"android_output_type,opt[apk,appbundle]"`
 	AndroidAdditionalParams string     `env:"android_additional_params"`
-	AndroidExportPattern    string     `env:"android_output_pattern,required"`
+	AndroidExportPattern    []string   `env:"android_output_pattern,multiline"`
 
 	// Deprecated
-	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
+	AndroidBundleExportPattern []string `env:"android_bundle_output_pattern,multiline"`
 }
 
 func failf(msg string, args ...interface{}) {
@@ -59,7 +58,7 @@ func failf(msg string, args ...interface{}) {
 }
 
 func handleDeprecatedInputs(cfg *config) {
-	if cfg.AndroidBundleExportPattern != "" && cfg.AndroidBundleExportPattern != "*build/app/outputs/bundle/*/*.aab" {
+	if len(cfg.AndroidBundleExportPattern) > 0 && cfg.AndroidBundleExportPattern[0] != "*build/app/outputs/bundle/*/*.aab" {
 		log.Warnf("step input 'App bundle output pattern' (android_bundle_output_pattern) is deprecated and will be removed on 20 November 2019, use 'Output (.apk, .aab) pattern' (android_output_pattern) instead!")
 		log.Printf("Using 'App bundle output pattern' (android_bundle_output_pattern) instead of 'Output (.apk, .aab) pattern' (android_output_pattern).")
 		log.Printf("If you don't want to use 'App bundle output pattern' (android_bundle_output_pattern), empty it's value.")
@@ -173,14 +172,14 @@ build:
 			displayName:          "iOS app",
 			platformOutputType:   cfg.IOSOutputType,
 			platformSelectors:    []string{"both", "ios"},
-			outputPathPatterns:   strings.Split(cfg.IOSExportPattern, "\n"),
+			outputPathPatterns:   cfg.IOSExportPattern,
 			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.IOSAdditionalParams,
 		},
 		{
 			displayName:          "Android app",
 			platformOutputType:   cfg.AndroidOutputType,
 			platformSelectors:    []string{"both", "android"},
-			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
+			outputPathPatterns:   cfg.AndroidExportPattern,
 			additionalParameters: cfg.AdditionalBuildParams + " " + cfg.AndroidAdditionalParams,
 		},
 	}

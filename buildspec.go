@@ -210,7 +210,7 @@ func (spec buildSpecification) build(params string) error {
 
 	buildCmd := command.New("flutter", append([]string{"build", platformCmd}, paramSlice...)...).SetStdout(os.Stdout)
 
-	if spec.platformOutputType == OutputTypeIOSApp {
+	if spec.platformOutputType == OutputTypeIOSApp || spec.platformOutputType == OutputTypeArchive {
 		buildCmd.SetStdin(strings.NewReader("a")) // if the CLI asks to input the selected identity we force it to be aborted
 		errorWriter = io.MultiWriter(os.Stderr, &errBuffer)
 	}

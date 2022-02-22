@@ -70,7 +70,7 @@ func handleDeprecatedInputs(cfg *config) {
 func main() {
 	var cfg config
 	if err := stepconf.Parse(&cfg); err != nil {
-		failf("Issue with input: %s", err)
+		failf("Process config: failed to parse input: %s", err)
 	}
 	stepconf.Print(cfg)
 	handleDeprecatedInputs(&cfg)
@@ -78,14 +78,14 @@ func main() {
 
 	projectLocationAbs, err := filepath.Abs(cfg.ProjectLocation)
 	if err != nil {
-		failf("Failed to get absolute project path, error: %s", err)
+		failf("Process config: failed to get absolute project path of %s: %s", cfg.ProjectLocation, err)
 	}
 
 	exist, err := pathutil.IsDirExists(projectLocationAbs)
 	if err != nil {
-		failf("Failed to check if project path exists, error: %s", err)
+		failf("Process config: failed to check if project path exists: %s", err)
 	} else if !exist {
-		failf("Project path does not exist.")
+		failf("Process config: project path does not exist")
 	}
 
 	if cfg.Platform == "ios" || cfg.Platform == "both" {
@@ -94,7 +94,7 @@ func main() {
 
 		iosParams, err := shellquote.Split(cfg.IOSAdditionalParams)
 		if err != nil {
-			failf(" - Failed to get iOS additional parameters, error: %s", err)
+			failf("Process config: failed to parse iOS additional parameters: %s", err)
 		}
 		if sliceutil.IsStringInSlice(noCodesignFlag, iosParams) {
 			log.Printf(" - Skipping codesign preparation, %s parameter set", noCodesignFlag)
@@ -108,28 +108,28 @@ func main() {
 		log.Printf(" Installed codesign identities:")
 		installedCertificates, err := certificateutil.InstalledCodesigningCertificateNames()
 		if err != nil {
-			failf(" - Failed to fetch installed codesign identities, error: %s", err)
+			failf("Run: failed to fetch installed codesign identities: %s", err)
 		}
 		for _, identity := range installedCertificates {
 			log.Printf(" - %s", identity)
 		}
 
 		if len(installedCertificates) == 0 {
-			failf(" - No codesign identities installed")
+			failf("Run: no codesign identities installed")
 		}
 
 		var flutterSettings map[string]string
 		flutterSettingsExists, err := pathutil.IsPathExists(flutterConfigPath)
 		if err != nil {
-			failf(" - Failed to check if path exists, error: %s", err)
+			failf("Run: failed to check if %s exists: %s", flutterConfigPath, err)
 		}
 		if flutterSettingsExists {
 			flutterSettingsContent, err := fileutil.ReadBytesFromFile(flutterConfigPath)
 			if err != nil {
-				failf(" - Failed to check if path exists, error: %s", err)
+				failf("Run: error while reading %s: %s", flutterConfigPath, err)
 			}
 			if err := json.Unmarshal(flutterSettingsContent, &flutterSettings); err != nil {
-				failf(" - Failed to unmarshal .flutter_settings file, error: %s", err)
+				failf("Run: failed to parse .flutter_settings file: %s", err)
 			}
 		} else {
 			flutterSettings = map[string]string{}
@@ -139,15 +139,15 @@ func main() {
 			log.Warnf(" Override codesign identity:")
 			log.Printf(" - Store: %s", cfg.IOSCodesignIdentity)
 			if !sliceutil.IsStringInSlice(cfg.IOSCodesignIdentity, installedCertificates) {
-				failf(" - The selected identity \"%s\" is not installed on the system", cfg.IOSCodesignIdentity)
+				failf("Process config: the selected identity \"%s\" is not installed on the system", cfg.IOSCodesignIdentity)
 			}
 			flutterSettings[codesignField] = cfg.IOSCodesignIdentity
 			newSettingsContent, err := json.MarshalIndent(flutterSettings, "", " ")
 			if err != nil {
-				failf(" - Failed to unmarshal .flutter_settings file, error: %s", err)
+				failf("Run: failed to parse .flutter_settings file: %s", err)
 			}
 			if err := fileutil.WriteBytesToFile(flutterConfigPath, newSettingsContent); err != nil {
-				failf(" - Failed to write .flutter_settings file, error: %s", err)
+				failf("Run: error while writing .flutter_settings file: %s", err)
 			}
 			log.Donef(" - Done")
 			goto build
@@ -160,7 +160,7 @@ func main() {
 		} else {
 			log.Printf(" - %s", storedIdentity)
 			if !sliceutil.IsStringInSlice(storedIdentity, installedCertificates) {
-				failf(" - Identity \"%s\" is not installed on the system", storedIdentity)
+				failf("Process config: identity \"%s\" is not installed on the system", storedIdentity)
 			}
 		}
 	}
@@ -202,7 +202,7 @@ build:
 				}
 			}
 
-			failf("Failed to build %s platform, error: %s", spec.displayName, err)
+			failf("Run: failed to build %s: %s", spec.displayName, err)
 		}
 
 		fmt.Println()
@@ -218,16 +218,16 @@ build:
 		}
 
 		if err != nil {
-			failf("failed to find artifacts, error: %s", err)
+			failf("Export outputs: failed to find artifacts: %s", err)
 		}
 
 		if len(artifacts) < 1 {
-			failf(`Artifact path pattern (%s) did not match any artifacts on the path (%s).
+			failf(`Export outputs: artifact path pattern (%s) did not match any artifacts on the path (%s).
 Check that 'iOS/Android Output Pattern' and 'Project Location' is correct.`, spec.outputPathPatterns, spec.projectLocation)
 		}
 
 		if err := spec.exportArtifacts(artifacts); err != nil {
-			failf("Failed to export %s artifacts, error: %s", spec.displayName, err)
+			failf("Export outputs: failed to export %s artifacts: %s", spec.displayName, err)
 		}
 	}
 

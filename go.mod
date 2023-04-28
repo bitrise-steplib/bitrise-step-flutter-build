@@ -9,4 +9,5 @@ require (
 	github.com/bitrise-io/go-xcode v0.0.0-20210714144817-465637d28b74
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/ryanuber/go-glob v1.0.0
+	github.com/stretchr/testify v1.8.2
 )

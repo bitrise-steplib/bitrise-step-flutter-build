@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -8,11 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	androidCache "github.com/bitrise-io/go-android/cache"
 	"github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
-	androidCache "github.com/bitrise-io/go-android/cache"
 )
 
 func cacheCocoapodsDeps(projectLocation string) error {
@@ -65,14 +66,12 @@ func cacheAndroidDeps(projectDir string) error {
 	return androidCache.Collect(androidDir, cache.LevelDeps)
 }
 
-func openPackageResolutionFile(projectDir string) (string, error) {
-	resolutionFilePath := filepath.Join(projectDir, ".packages")
-
-	if _, err := os.Stat(resolutionFilePath); os.IsNotExist(err) {
-		return "", fmt.Errorf("package resolution file (%s) not found, error: %s", resolutionFilePath, err)
+func openFile(filepath string) (string, error) {
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		return "", fmt.Errorf("file (%s) not found, error: %s", filepath, err)
 	}
 
-	contents, err := ioutil.ReadFile(resolutionFilePath)
+	contents, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read package resolution file, error: %s", err)
 	}
@@ -212,14 +211,12 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 }
 
 func cacheFlutterDeps(projectDir string) error {
-	contents, err := openPackageResolutionFile(projectDir)
+	packageToLocation, err := readOldPackageFormat(projectDir)
 	if err != nil {
-		return err
-	}
-
-	packageToLocation, err := parsePackageResolutionFile(contents)
-	if err != nil {
-		return fmt.Errorf("failed to parse Flutter package resolution file, error: %s", err)
+		packageToLocation, err = readNewJSONFormat(projectDir)
+		if err != nil {
+			return err
+		}
 	}
 
 	cachePaths, err := cacheableFlutterDepPaths(packageToLocation)
@@ -233,4 +230,64 @@ func cacheFlutterDeps(projectDir string) error {
 		pubCache.IncludePath(path)
 	}
 	return pubCache.Commit()
+}
+
+func readOldPackageFormat(projectDir string) (map[string]url.URL, error) {
+	packagePath := filepath.Join(projectDir, ".packages")
+	contents, err := openFile(packagePath)
+	if err != nil {
+		return map[string]url.URL{}, err
+	}
+
+	packageToLocation, err := parsePackageResolutionFile(contents)
+	if err != nil {
+		return map[string]url.URL{}, fmt.Errorf("failed to parse Flutter package resolution file, error: %s", err)
+	}
+
+	return packageToLocation, nil
+}
+
+func readNewJSONFormat(projectDir string) (map[string]url.URL, error) {
+	packagePath := filepath.Join(projectDir, ".dart_tool/package_config.json")
+	contents, err := openFile(packagePath)
+	if err != nil {
+		return map[string]url.URL{}, err
+	}
+
+	packages, err := parseJSON(contents)
+	if err != nil {
+		return map[string]url.URL{}, err
+	}
+
+	return packages, nil
+}
+
+func parseJSON(contents string) (map[string]url.URL, error) {
+	type packageConfig struct {
+		Packages []struct {
+			Name       string `json:"name"`
+			RootUri    string `json:"rootUri"`
+			PackageUri string `json:"packageUri"`
+		} `json:"packages"`
+	}
+
+	var config packageConfig
+	err := json.Unmarshal([]byte(contents), &config)
+	if err != nil {
+		return map[string]url.URL{}, err
+	}
+
+	packages := map[string]url.URL{}
+
+	for _, item := range config.Packages {
+		path := filepath.Join(item.RootUri, item.PackageUri)
+		location, err := url.Parse(path)
+		if err != nil {
+			return map[string]url.URL{}, fmt.Errorf("could not parse location URI: %s", path)
+		}
+
+		packages[item.Name] = *location
+	}
+
+	return packages, nil
 }

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"github.com/stretchr/testify/assert"
 	"net/url"
+	"path/filepath"
 	"reflect"
 	"testing"
 
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/stretchr/testify/require"
 )
 
 // Example file:
@@ -172,4 +175,33 @@ func Test_cacheableFlutterDepPaths(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestJSONFormatParsing(t *testing.T) {
+	testData := `
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "insert-cool-name-here",
+      "rootUri": "file:///path/to/file",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ],
+  "generated": "2023-04-26T10:11:25.639598Z",
+  "generator": "pub",
+  "generatorVersion": "2.15.1"
+}
+`
+	result, err := parseJSON(testData)
+	require.NoError(t, err)
+
+	fileURL, err := url.Parse(filepath.Join("file:///path/to/file", "lib/"))
+	require.NoError(t, err)
+
+	expected := map[string]url.URL{
+		"insert-cool-name-here": *fileURL,
+	}
+	assert.Equal(t, expected, result)
 }

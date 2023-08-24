@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -71,7 +70,7 @@ func openFile(filepath string) (string, error) {
 		return "", fmt.Errorf("file (%s) not found, error: %s", filepath, err)
 	}
 
-	contents, err := ioutil.ReadFile(filepath)
+	contents, err := os.ReadFile(filepath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read package resolution file, error: %s", err)
 	}

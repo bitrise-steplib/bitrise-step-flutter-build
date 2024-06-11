@@ -116,10 +116,12 @@ inputs:
     description: |-
       Output type to build when building for iOS. Possible values:
       - `app`: Build an iOS application bundle via `flutter build ios`
+      - `app`: Build an iOS application bundle via `flutter build ios` and `--codesign`
       - `archive`: Build an iOS archive bundle via `flutter build ipa`
     is_required: true
     value_options:
     - app
+    - app-with-codesign
     - archive
 - ios_codesign_identity:
   opts:

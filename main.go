@@ -25,8 +25,9 @@ const (
 	OutputTypeAPK       OutputType = "apk"
 	OutputTypeAppBundle OutputType = "appbundle"
 
-	OutputTypeIOSApp  OutputType = "app"     // CLI: flutter build ios
-	OutputTypeArchive OutputType = "archive" // CLI: flutter build ipa
+	OutputTypeIOSApp             OutputType = "app"               // CLI: flutter build ios
+	OutputTypeIOSAppWithCodeSign OutputType = "app-with-codesign" // CLI: flutter build ios + codesign
+	OutputTypeArchive            OutputType = "archive"           // CLI: flutter build ipa
 )
 
 var flutterConfigPath = filepath.Join(os.Getenv("HOME"), ".flutter_settings")
@@ -39,7 +40,7 @@ type config struct {
 	DebugMode             bool   `env:"is_debug_mode,opt[true,false]"`
 	CacheLevel            string `env:"cache_level,opt[all,none]"`
 
-	IOSOutputType       OutputType `env:"ios_output_type,opt[app,archive]"`
+	IOSOutputType       OutputType `env:"ios_output_type,opt[app,app-with-codesign,archive]"`
 	IOSAdditionalParams string     `env:"ios_additional_params"`
 	IOSExportPattern    []string   `env:"ios_output_pattern,multiline"`
 	IOSCodesignIdentity string     `env:"ios_codesign_identity"`

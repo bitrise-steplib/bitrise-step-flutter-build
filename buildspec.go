@@ -35,7 +35,7 @@ func (spec buildSpecification) exportArtifacts(artifacts []string) error {
 		return spec.exportAndroidArtifacts(OutputTypeAPK, artifacts, deployDir)
 	case OutputTypeAppBundle:
 		return spec.exportAndroidArtifacts(OutputTypeAppBundle, artifacts, deployDir)
-	case OutputTypeIOSApp:
+	case OutputTypeIOSApp, OutputTypeIOSAppWithCodeSign:
 		return spec.exportIOSApp(artifacts, deployDir)
 	case OutputTypeArchive:
 		return spec.exportIOSArchive(artifacts, deployDir)
@@ -196,7 +196,7 @@ func (spec buildSpecification) build(params string) error {
 
 	var platformCmd string
 	switch spec.platformOutputType {
-	case OutputTypeIOSApp:
+	case OutputTypeIOSApp, OutputTypeIOSAppWithCodeSign:
 		platformCmd = "ios" // $ flutter build ios -> .app output
 	case OutputTypeArchive:
 		platformCmd = "ipa" // $ flutter build ipa -> .xcarchive output
@@ -210,7 +210,7 @@ func (spec buildSpecification) build(params string) error {
 
 	buildCmd := command.New("flutter", append([]string{"build", platformCmd}, paramSlice...)...).SetStdout(os.Stdout)
 
-	if spec.platformOutputType == OutputTypeIOSApp || spec.platformOutputType == OutputTypeArchive {
+	if spec.platformOutputType == OutputTypeIOSApp || spec.platformOutputType == OutputTypeIOSAppWithCodeSign || spec.platformOutputType == OutputTypeArchive {
 		buildCmd.SetStdin(strings.NewReader("a")) // if the CLI asks to input the selected identity we force it to be aborted
 		errorWriter = io.MultiWriter(os.Stderr, &errBuffer)
 	}

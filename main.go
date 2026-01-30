@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-xcode/certificateutil"
 	shellquote "github.com/kballard/go-shellquote"
 )
@@ -96,7 +96,7 @@ func main() {
 		if err != nil {
 			failf("Process config: failed to parse iOS additional parameters: %s", err)
 		}
-		if sliceutil.IsStringInSlice(noCodesignFlag, iosParams) {
+		if slices.Contains(iosParams, noCodesignFlag) {
 			log.Printf(" - Skipping codesign preparation, %s parameter set", noCodesignFlag)
 			goto build
 		}
@@ -138,7 +138,7 @@ func main() {
 		if cfg.IOSCodesignIdentity != "" {
 			log.Warnf(" Override codesign identity:")
 			log.Printf(" - Store: %s", cfg.IOSCodesignIdentity)
-			if !sliceutil.IsStringInSlice(cfg.IOSCodesignIdentity, installedCertificates) {
+			if !slices.Contains(installedCertificates, cfg.IOSCodesignIdentity) {
 				failf("Process config: the selected identity \"%s\" is not installed on the system", cfg.IOSCodesignIdentity)
 			}
 			flutterSettings[codesignField] = cfg.IOSCodesignIdentity
@@ -159,7 +159,7 @@ func main() {
 			log.Printf(" - No codesign identity set")
 		} else {
 			log.Printf(" - %s", storedIdentity)
-			if !sliceutil.IsStringInSlice(storedIdentity, installedCertificates) {
+			if !slices.Contains(installedCertificates, storedIdentity) {
 				failf("Process config: identity \"%s\" is not installed on the system", storedIdentity)
 			}
 		}

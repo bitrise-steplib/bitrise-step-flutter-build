@@ -1,6 +1,6 @@
 module github.com/bitrise-steplib/bitrise-step-flutter-build
 
-go 1.20
+go 1.21
 
 require (
 	github.com/bitrise-io/go-android v0.0.0-20210527143215-3ad22ad02e2e

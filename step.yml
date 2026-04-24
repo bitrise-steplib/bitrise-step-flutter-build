@@ -183,18 +183,28 @@ outputs:
 - BITRISE_APK_PATH:
   opts:
     title: The created .apk file's path
+    summary: The created .apk file's path.
+    description: The created .apk file's path.
 - BITRISE_APK_PATH_LIST:
   opts:
     title: All created .apk file's path list
+    summary: All created .apk file paths, separated by |.
+    description: All created .apk file paths, separated by |.
 - BITRISE_APP_DIR_PATH:
   opts:
     title: The generated `.app` directory
+    summary: The generated .app directory's path.
+    description: The generated .app directory's path.
 - BITRISE_XCARCHIVE_PATH:
   opts:
     title: The generated `.xcarchive` directory
+    summary: The generated .xcarchive directory's path.
+    description: The generated .xcarchive directory's path.
 - BITRISE_XCARCHIVE_ZIP_PATH:
   opts:
     title: The generated `.xcarchive` directory compressed as a ZIP archive
+    summary: The generated .xcarchive directory compressed as a ZIP archive.
+    description: The generated .xcarchive directory compressed as a ZIP archive.
 - BITRISE_AAB_PATH_LIST:
   opts:
     title: List of the generated AAB file paths

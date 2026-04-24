@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - SAMPLE_APP_URL: https://github.com/bitrise-io/Bitrise-Flutter-Sample.git
-  - SAMPLE_APP_BRANCH: e2e-test
+  - SAMPLE_APP_BRANCH: bb/valid_bundle_id
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
   # secrets

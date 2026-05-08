@@ -1,93 +1,100 @@
 # Flutter Build
 
-This step will build a Flutter project
+[![Step changelog](https://shields.io/github/v/release/bitrise-steplib/bitrise-step-flutter-build?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/bitrise-step-flutter-build/releases)
 
+Builds a Flutter project.
 
-## How to use this Step
+<details>
+<summary>Description</summary>
 
-Can be run directly with the [bitrise CLI](https://github.com/bitrise-io/bitrise),
-just `git clone` this repository, `cd` into it's folder in your Terminal/Command Line
-and call `bitrise run test`.
+This Step builds an iOS and an Android app. By default the Step builds the artifact based on the platform the scanner detects.
 
-*Check the `bitrise.yml` file for required inputs which have to be
-added to your `.bitrise.secrets.yml` file!*
+### Configuring the Step
+1. In the **Project Location** input the root directory of your Flutter project is automatically filled out.
+2. Select which platform your project should be built for (`ios`, `android` or `both`).
+3. Enable **Debug** option to get verbose logs and see where the Step is failing.
 
-Step by step:
+Depending on the selected platform/s, continue with the rest of the config inputs.
 
-1. Open up your Terminal / Command Line
-2. `git clone` the repository
-3. `cd` into the directory of the step (the one you just `git clone`d)
-5. Create a `.bitrise.secrets.yml` file in the same directory of `bitrise.yml`
-   (the `.bitrise.secrets.yml` is a git ignored file, you can store your secrets in it)
-6. Check the `bitrise.yml` file for any secret you should set in `.bitrise.secrets.yml`
-  * Best practice is to mark these options with something like `# define these in your .bitrise.secrets.yml`, in the `app:envs` section.
-7. Once you have all the required secret parameters in your `.bitrise.secrets.yml` you can just run this step with the [bitrise CLI](https://github.com/bitrise-io/bitrise): `bitrise run test`
+#### Configuring for an iOS app
+1. Make sure the **Platform input** is set to `iOS` or `both`.
+2. In **Codesign Identity** you can onverride the code signing identities that you set in Flutter.
+3. In **Additional parameters** add any flag to customize your build (for example, the `--release` flag appended to `flutter build io` builds a deployable iOS app).
+4. Leave the **Output pattern** input's default value as is or modify it to the pattern if your build artifacts are stored elsewhere.
+5. Make sure you have the **Xcode Archive & Export for iOS** Step after the **Flutter Build** Step in your Workflow.
 
-An example `.bitrise.secrets.yml` file:
+#### Configuring for an Android app
+1. Insert the **Android Sign** Step after the **Flutter Build** Step and make sure code signing files are uploaded to the **Code Signing** tab.
+2. Make sure the **Platform input** is set to `Android` or `both`.
+3. Scroll down to the `Android Platform Configs` input section, and select the preferred output artifact type you wish to generate in the **Android output artifact type** input. The Step can build an APK and an Android App Bundle as well.
+4. Append any flag to the `build` command in the **Additional parameters** input.
+5. Leave the **Output pattern** input's default value as is or modify it to the pattern if your build artifacts are stored elsewhere.
 
-```
-envs:
-- A_SECRET_PARAM_ONE: the value for secret one
-- A_SECRET_PARAM_TWO: the value for secret two
-```
+### Troubleshooting
 
-## How to create your own step
+Make sure the **Flutter Install** Step is before the **Flutter Build** Step.
+If you have not set up code signing correctly, some code signing related issue will definitely surface by this build Step.
+If you're unsure about code signing, consult our guide linked in Useful links.
 
-1. Create a new git repository for your step (**don't fork** the *step template*, create a *new* repository)
-2. Copy the [step template](https://github.com/bitrise-steplib/step-template) files into your repository
-3. Fill the `step.sh` with your functionality
-4. Wire out your inputs to `step.yml` (`inputs` section)
-5. Fill out the other parts of the `step.yml` too
-6. Provide test values for the inputs in the `bitrise.yml`
-7. Run your step with `bitrise run test` - if it works, you're ready
+### Useful links
+- [Getting started with Flutter apps](https://devcenter.bitrise.io/getting-started/getting-started-with-flutter-apps/#deploying-a-flutter-app)
+- [Available version tags](https://github.com/flutter/flutter/releases)
+- [Available branches](https://github.com/flutter/flutter/branches)
+- [Code signing](https://devcenter.bitrise.io/code-signing/code-signing-index/)
 
-__For Step development guidelines & best practices__ check this documentation: [https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md](https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md).
+### Related Steps
+- [Flutter Install](https://www.bitrise.io/integrations/steps/flutter-installer)
+- [Flutter Test](https://www.bitrise.io/integrations/steps/flutter-test)
+</details>
 
-**NOTE:**
+## 🧩 Get started
 
-If you want to use your step in your project's `bitrise.yml`:
+Add this step directly to your workflow in the [Bitrise Workflow Editor](https://docs.bitrise.io/en/bitrise-ci/workflows-and-pipelines/steps/adding-steps-to-a-workflow.html).
 
-1. git push the step into it's repository
-2. reference it in your `bitrise.yml` with the `git::PUBLIC-GIT-CLONE-URL@BRANCH` step reference style:
+You can also run this step directly with [Bitrise CLI](https://github.com/bitrise-io/bitrise).
 
-```
-- git::https://github.com/user/my-step.git@branch:
-   title: My step
-   inputs:
-   - my_input_1: "my value 1"
-   - my_input_2: "my value 2"
-```
+## ⚙️ Configuration
 
-You can find more examples of step reference styles
-in the [bitrise CLI repository](https://github.com/bitrise-io/bitrise/blob/master/_examples/tutorials/steps-and-workflows/bitrise.yml#L65).
+<details>
+<summary>Inputs</summary>
 
-## How to contribute to this Step
+| Key | Description | Flags | Default |
+| --- | --- | --- | --- |
+| `project_location` | The root dir of your Flutter project. | required | `$BITRISE_SOURCE_DIR` |
+| `platform` | The selected platform will be built, or both iOs and Android if you select both | required | `both` |
+| `additional_build_params` | Additional params for flutter build.  Example: you can specify a Build Number for `flutter build` via the `--build-number` flutter build param. For example, to set it to the `$BITRISE_BUILD_NUMBER` you can set this input to: `--build-number=$BITRISE_BUILD_NUMBER`. |  |  |
+| `is_debug_mode` | If debug mode is enabled, the step will print verbose logs | required | `false` |
+| `cache_level` | If enabled, will cache: - pub packages - Android (gradle) cache - Carthage / Cocoapods dependencies | required | `all` |
+| `ios_output_type` | Output type to build when building for iOS. Possible values: - `app`: Build an iOS application bundle via `flutter build ios` - `archive`: Build an iOS archive bundle via `flutter build ipa` | required | `app` |
+| `ios_codesign_identity` | Override codesign identity in .flutter_settings |  |  |
+| `ios_additional_params` | The flags from this input field will be appended to the `flutter build ios` command. |  | `--release` |
+| `ios_output_pattern` | Separate patterns with a newline. | required | `*build/ios/iphoneos/*.app *build/ios/archive/*.xcarchive` |
+| `android_output_type` | The selected output type will be build, either APK or app bundle (AAB) | required | `apk` |
+| `android_additional_params` | The flags from this input field will be appended to the `flutter build apk` command. |  | `--release` |
+| `android_output_pattern` | Will find the APK or AAB files - `depending on the build type input` - with the given pattern.<br/> Separate patterns with a newline. **Note**<br/> The step will export only the selected artifact type - `Android output artifact type` - even if the filter would accept other artifact types as well.  | required | `*build/app/outputs/apk/*/*.apk *build/app/outputs/bundle/*/*.aab` |
+| `android_bundle_output_pattern` | Pattern to find built AAB artifacts relative to `$BITRISE_SOURCE_DIR` |  | `*build/app/outputs/bundle/*/*.aab` |
+</details>
 
-1. Fork this repository
-2. `git clone` it
-3. Create a branch you'll work on
-4. To use/test the step just follow the **How to use this Step** section
-5. Do the changes you want to
-6. Run/test the step before sending your contribution
-  * You can also test the step in your `bitrise` project, either on your Mac or on [bitrise.io](https://www.bitrise.io)
-  * You just have to replace the step ID in your project's `bitrise.yml` with either a relative path, or with a git URL format
-  * (relative) path format: instead of `- original-step-id:` use `- path::./relative/path/of/script/on/your/Mac:`
-  * direct git URL format: instead of `- original-step-id:` use `- git::https://github.com/user/step.git@branch:`
-  * You can find more example of alternative step referencing at: https://github.com/bitrise-io/bitrise/blob/master/_examples/tutorials/steps-and-workflows/bitrise.yml
-7. Once you're done just commit your changes & create a Pull Request
+<details>
+<summary>Outputs</summary>
 
+| Environment Variable | Description |
+| --- | --- |
+| `BITRISE_APK_PATH` | The created .apk file's path. |
+| `BITRISE_APK_PATH_LIST` | All created .apk file paths, separated by \|. |
+| `BITRISE_APP_DIR_PATH` | The generated .app directory's path. |
+| `BITRISE_XCARCHIVE_PATH` | The generated .xcarchive directory's path. |
+| `BITRISE_XCARCHIVE_ZIP_PATH` | The generated .xcarchive directory compressed as a ZIP archive. |
+| `BITRISE_AAB_PATH_LIST` | This output will include the paths of the generated AAB files, after filtering based on the filter inputs. The paths are separated with `\|` character, eg: `app.aab\|app2.aab` |
+| `BITRISE_AAB_PATH` | This output will include the path of the generated AAB file, after filtering based on the filter inputs. If the build generates more than one AAB file which fulfills the filter inputs this output will contain the last one's path. |
+</details>
 
-## Share your own Step
+## 🙋 Contributing
 
-You can share your Step or step version with the [bitrise CLI](https://github.com/bitrise-io/bitrise). If you use the `bitrise.yml` included in this repository, all you have to do is:
+We welcome [pull requests](https://github.com/bitrise-steplib/bitrise-step-flutter-build/pulls) and [issues](https://github.com/bitrise-steplib/bitrise-step-flutter-build/issues) against this repository.
 
-1. In your Terminal / Command Line `cd` into this directory (where the `bitrise.yml` of the step is located)
-1. Run: `bitrise run test` to test the step
-1. Run: `bitrise run audit-this-step` to audit the `step.yml`
-1. Check the `share-this-step` workflow in the `bitrise.yml`, and fill out the
-   `envs` if you haven't done so already (don't forget to bump the version number if this is an update
-   of your step!)
-1. Then run: `bitrise run share-this-step` to share the step (version) you specified in the `envs`
-1. Send the Pull Request, as described in the logs of `bitrise run share-this-step`
+For pull requests, work on your changes in a forked repository and use the Bitrise CLI to [run step tests locally](https://docs.bitrise.io/en/bitrise-ci/bitrise-cli/running-your-first-local-build-with-the-cli.html).
 
-That's all ;)
+Learn more about developing steps:
+
+- [Create your own step](https://docs.bitrise.io/en/bitrise-ci/workflows-and-pipelines/developing-your-own-bitrise-step/developing-a-new-step.html)

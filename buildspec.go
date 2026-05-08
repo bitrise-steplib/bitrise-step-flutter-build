@@ -7,13 +7,14 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/output"
 	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-io/go-utils/sliceutil"
+
 	"github.com/bitrise-io/go-utils/ziputil"
 	"github.com/kballard/go-shellquote"
 	"github.com/ryanuber/go-glob"
@@ -163,7 +164,7 @@ func filterAndroidArtifactsBy(androidOutputType OutputType, artifacts []string) 
 }
 
 func (spec buildSpecification) buildable(platform string) bool {
-	return sliceutil.IsStringInSlice(platform, spec.platformSelectors)
+	return slices.Contains(spec.platformSelectors, platform)
 }
 
 func findPaths(location string, outputPathPattern string, dir bool) (out []string, err error) {

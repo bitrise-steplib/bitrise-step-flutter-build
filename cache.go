@@ -6,13 +6,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	androidCache "github.com/bitrise-io/go-android/cache"
 	"github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
 )
 
 func cacheCocoapodsDeps(projectLocation string) error {
@@ -174,7 +174,7 @@ func cacheableFlutterDepPaths(packageToLocation map[string]url.URL) ([]string, e
 			return []string{}, fmt.Errorf("package %s location is the root directory", packageName)
 		}
 
-		cacheRootIndex := sliceutil.IndexOfStringInSlice(".pub-cache", pathElements)
+		cacheRootIndex := slices.Index(pathElements, ".pub-cache")
 		if cacheRootIndex == -1 {
 			log.Debugf("Flutter dependency cache: package not in system dependency cache: %s", location.Path)
 			continue

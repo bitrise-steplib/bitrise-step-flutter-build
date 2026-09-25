@@ -290,5 +290,5 @@ workflows:
         - branch: $SAMPLE_APP_BRANCH
     - flutter-installer:
         inputs:
-        - version: 3.7.12
+        - version: 3.10.6
         - is_update: "false"

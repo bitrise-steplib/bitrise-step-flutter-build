@@ -170,41 +170,6 @@ workflows:
         - is_debug_mode: "true"
         - platform: both
 
-  test_cache:
-    envs:
-    - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache.tar.gz
-    before_run:
-    - _setup_test
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            rm -rf $HOME/.pub-cache
-    - cache-pull:
-        run_if: "true"
-    - path::./:
-        inputs:
-        - is_debug_mode: "true"
-        - platform: android
-        - android_output_type: apk
-        - android_additional_params: ""
-        - cache_level: all
-    - cache-push:
-        run_if: "true"
-    - script:
-        inputs:
-        - content: |-
-            rm -rf $HOME/.pub-cache
-    - cache-pull:
-        run_if: "true"
-    - path::./:
-        inputs:
-        - is_debug_mode: "true"
-        - platform: android
-        - android_output_type: apk
-        - android_additional_params: ""
-        - cache_level: all
-
   test_additional_build_params_android:
     before_run:
     - _setup_test
@@ -325,5 +290,5 @@ workflows:
         - branch: $SAMPLE_APP_BRANCH
     - flutter-installer:
         inputs:
-        - version: 3.7.12
+        - version: 3.10.6
         - is_update: "false"

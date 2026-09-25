@@ -64,7 +64,6 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `platform` | The selected platform will be built, or both iOs and Android if you select both | required | `both` |
 | `additional_build_params` | Additional params for flutter build.  Example: you can specify a Build Number for `flutter build` via the `--build-number` flutter build param. For example, to set it to the `$BITRISE_BUILD_NUMBER` you can set this input to: `--build-number=$BITRISE_BUILD_NUMBER`. |  |  |
 | `is_debug_mode` | If debug mode is enabled, the step will print verbose logs | required | `false` |
-| `cache_level` | If enabled, will cache: - pub packages - Android (gradle) cache - Carthage / Cocoapods dependencies | required | `all` |
 | `ios_output_type` | Output type to build when building for iOS. Possible values: - `app`: Build an iOS application bundle via `flutter build ios` - `archive`: Build an iOS archive bundle via `flutter build ipa` | required | `app` |
 | `ios_codesign_identity` | Override codesign identity in .flutter_settings |  |  |
 | `ios_additional_params` | The flags from this input field will be appended to the `flutter build ios` command. |  | `--release` |

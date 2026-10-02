@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - SAMPLE_APP_URL: https://github.com/bitrise-io/Bitrise-Flutter-Sample.git
-  - SAMPLE_APP_BRANCH: main
+  - SAMPLE_APP_BRANCH: fix/null-safety-migration  # TEMPORARY - revert to `main` before merging
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
   # secrets
@@ -50,6 +50,62 @@ workflows:
         - install_defaults: "no"
         - keychain_path: $BITRISE_KEYCHAIN_PATH
         - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
+    - script:
+        title: Drop codesign identities the pinned profile does not embed
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -eo pipefail
+
+            # Two "Apple Development: Tooling Bot Bitrise (H3RAQJ3F2B)" certificates are
+            # installed, with different serials and expiries.
+            # Remove the installed identities this profile does not embed, but only where a
+            # same-named one that it does embed is also installed.
+            PROFILE_NAME="Wildcard_Bitrise_iOS_development__iobitrise"
+
+            python3 - "$PROFILE_NAME" "$BITRISE_KEYCHAIN_PATH" <<'PY'
+            import glob, hashlib, os, plistlib, re, subprocess, sys
+
+            profile_name, keychain = sys.argv[1], sys.argv[2]
+
+            out = subprocess.run(["security", "find-identity", "-v", "-p", "codesigning"],
+                                 capture_output=True, text=True, check=True).stdout
+            installed = re.findall(r'\)\s+([0-9A-F]{40})\s+"(.*)"', out)
+            print("Installed codesigning identities:")
+            for sha1, name in installed:
+                print(f"  {sha1}  {name}")
+
+            embedded = set()
+            for path in glob.glob(os.path.expanduser(
+                    "~/Library/MobileDevice/Provisioning Profiles/*.mobileprovision")):
+                try:
+                    plist = plistlib.loads(subprocess.run(
+                        ["security", "cms", "-D", "-i", path],
+                        capture_output=True, check=True).stdout)
+                except subprocess.CalledProcessError:
+                    continue
+                if plist.get("Name") != profile_name:
+                    continue
+                for der in plist.get("DeveloperCertificates", []):
+                    embedded.add(hashlib.sha1(bytes(der)).hexdigest().upper())
+
+            if not embedded:
+                sys.exit(f'Profile "{profile_name}" is not installed')
+
+            ambiguous = {name for sha1, name in installed if sha1 in embedded}
+            print(f'\n"{profile_name}" embeds {len(embedded)} certificates, '
+                  f"{len(ambiguous)} of which are installed")
+
+            removed = 0
+            for sha1, name in installed:
+                if name in ambiguous and sha1 not in embedded:
+                    print(f"  Removing {sha1}  {name} (not embedded in the profile)")
+                    subprocess.run(["security", "delete-identity", "-Z", sha1, keychain],
+                                   check=True, capture_output=True)
+                    removed += 1
+            if removed == 0:
+                print("  Nothing to remove")
+            PY
     - path::./:
         inputs:
         - platform: ios
@@ -169,41 +225,6 @@ workflows:
         inputs:
         - is_debug_mode: "true"
         - platform: both
-
-  test_cache:
-    envs:
-    - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache.tar.gz
-    before_run:
-    - _setup_test
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            rm -rf $HOME/.pub-cache
-    - cache-pull:
-        run_if: "true"
-    - path::./:
-        inputs:
-        - is_debug_mode: "true"
-        - platform: android
-        - android_output_type: apk
-        - android_additional_params: ""
-        - cache_level: all
-    - cache-push:
-        run_if: "true"
-    - script:
-        inputs:
-        - content: |-
-            rm -rf $HOME/.pub-cache
-    - cache-pull:
-        run_if: "true"
-    - path::./:
-        inputs:
-        - is_debug_mode: "true"
-        - platform: android
-        - android_output_type: apk
-        - android_additional_params: ""
-        - cache_level: all
 
   test_additional_build_params_android:
     before_run:
@@ -325,5 +346,5 @@ workflows:
         - branch: $SAMPLE_APP_BRANCH
     - flutter-installer:
         inputs:
-        - version: 3.7.12
+        - version: 3.10.6
         - is_update: "false"

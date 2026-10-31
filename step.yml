@@ -95,19 +95,6 @@ inputs:
     value_options:
     - "true"
     - "false"
-- cache_level: all
-  opts:
-    title: Build cache
-    summary: Enable or disable caching
-    description: |-
-      If enabled, will cache:
-      - pub packages
-      - Android (gradle) cache
-      - Carthage / Cocoapods dependencies
-    is_required: true
-    value_options:
-    - all
-    - none
 - ios_output_type: app
   opts:
     category: iOS Platform Configs

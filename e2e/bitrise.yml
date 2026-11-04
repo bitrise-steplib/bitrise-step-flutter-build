@@ -42,14 +42,42 @@ workflows:
     before_run:
     - _setup_test
     steps:
-    - certificate-and-profile-installer:
+    - script:
+        title: Select the Provisioning Profile used by the sample app
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -eo pipefail
+
+            # Other Provisioning Profiles include both "Apple Development: Tooling Bot Bitrise (H3RAQJ3F2B)"
+            # Certificates, so only the one used by the sample app is installed.
+            PROFILE_NAME="Wildcard_Bitrise_iOS_development__iobitrise"
+
+            tmp=$(mktemp)
+            IFS='|' read -ra urls <<< "$BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST"
+            for url in "${urls[@]}"; do
+              curl -fsSL "$url" -o "$tmp"
+              name=$(security cms -D -i "$tmp" | plutil -extract Name raw -o - -)
+              if [ "$name" == "$PROFILE_NAME" ]; then
+                envman add --key PROFILE_URL --value "$url" --sensitive
+                echo "Selected Provisioning Profile: $PROFILE_NAME"
+                exit 0
+              fi
+            done
+
+            echo "Provisioning Profile not found: $PROFILE_NAME"
+            exit 1
+    - certificate-and-profile-installer@1.12.0:
         inputs:
         - certificate_url: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
         - certificate_passphrase: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
-        - provisioning_profile_url: $BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST
+        - provisioning_profile_url: $PROFILE_URL
         - install_defaults: "no"
         - keychain_path: $BITRISE_KEYCHAIN_PATH
         - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
+        # Two "Apple Development: Tooling Bot Bitrise (H3RAQJ3F2B)" Certificates are provided,
+        # only the older one is included in the selected Provisioning Profile.
+        - deduplicate_certificates: "true"
     - path::./:
         inputs:
         - platform: ios
@@ -169,41 +197,6 @@ workflows:
         inputs:
         - is_debug_mode: "true"
         - platform: both
-
-  test_cache:
-    envs:
-    - BITRISE_CACHE_API_URL: file:///$ORIGIN_SOURCE_DIR/_cache.tar.gz
-    before_run:
-    - _setup_test
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            rm -rf $HOME/.pub-cache
-    - cache-pull:
-        run_if: "true"
-    - path::./:
-        inputs:
-        - is_debug_mode: "true"
-        - platform: android
-        - android_output_type: apk
-        - android_additional_params: ""
-        - cache_level: all
-    - cache-push:
-        run_if: "true"
-    - script:
-        inputs:
-        - content: |-
-            rm -rf $HOME/.pub-cache
-    - cache-pull:
-        run_if: "true"
-    - path::./:
-        inputs:
-        - is_debug_mode: "true"
-        - platform: android
-        - android_output_type: apk
-        - android_additional_params: ""
-        - cache_level: all
 
   test_additional_build_params_android:
     before_run:
@@ -325,5 +318,5 @@ workflows:
         - branch: $SAMPLE_APP_BRANCH
     - flutter-installer:
         inputs:
-        - version: 3.7.12
+        - version: 3.10.6
         - is_update: "false"

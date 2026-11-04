@@ -38,7 +38,6 @@ type config struct {
 	Platform              string `env:"platform,opt[both,ios,android]"`
 	AdditionalBuildParams string `env:"additional_build_params"`
 	DebugMode             bool   `env:"is_debug_mode,opt[true,false]"`
-	CacheLevel            string `env:"cache_level,opt[all,none]"`
 
 	IOSOutputType       OutputType `env:"ios_output_type,opt[app,archive]"`
 	IOSAdditionalParams string     `env:"ios_additional_params"`
@@ -229,27 +228,6 @@ Check that 'iOS/Android Output Pattern' and 'Project Location' is correct.`, spe
 
 		if err := spec.exportArtifacts(artifacts); err != nil {
 			failf("Export outputs: failed to export %s artifacts: %s", spec.displayName, err)
-		}
-	}
-
-	if cfg.CacheLevel == "all" {
-		fmt.Println()
-		log.Infof("Collecting cache")
-
-		if err := cacheCocoapodsDeps(projectLocationAbs); err != nil {
-			log.Warnf("Failed to collect cocoapods cache, error: %s", err)
-		}
-
-		if err := cacheCarthageDeps(projectLocationAbs); err != nil {
-			log.Warnf("Failed to collect carthage cache, error: %s", err)
-		}
-
-		if err := cacheAndroidDeps(projectLocationAbs); err != nil {
-			log.Warnf("Failed to collect android cache, error: %s", err)
-		}
-
-		if err := cacheFlutterDeps(projectLocationAbs); err != nil {
-			log.Warnf("Failed to collect flutter cache, error: %s", err)
 		}
 	}
 }

@@ -4,15 +4,15 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - SAMPLE_APP_URL: https://github.com/bitrise-io/Bitrise-Flutter-Sample.git
-  - SAMPLE_APP_BRANCH: main
+  - SAMPLE_APP_BRANCH: use-bitrise-team
   - ORIGIN_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
   # secrets
   - BITRISE_KEYCHAIN_PATH: $BITRISE_KEYCHAIN_PATH
   - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
-  - BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
-  - BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
-  - BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST: $BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST
+  - BLTD_APPLE_CERTIFICATE_URL_LIST: $BLTD_APPLE_CERTIFICATE_URL_LIST
+  - BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
+  - BLTD_PROVISIONING_PROFILE_URL_LIST: $BLTD_PROVISIONING_PROFILE_URL_LIST
 
 workflows:
   test_ios_archive:
@@ -49,12 +49,11 @@ workflows:
             #!/usr/bin/env bash
             set -eo pipefail
 
-            # Other Provisioning Profiles include both "Apple Development: Tooling Bot Bitrise (H3RAQJ3F2B)"
-            # Certificates, so only the one used by the sample app is installed.
-            PROFILE_NAME="Wildcard_Bitrise_iOS_development__iobitrise"
+            # The sample app is signed manually with this Provisioning Profile, so only this one is installed.
+            PROFILE_NAME="Bitrise Samples Wildcard Development"
 
             tmp=$(mktemp)
-            IFS='|' read -ra urls <<< "$BITFALL_APPLE_PROVISIONING_PROFILE_URL_LIST"
+            IFS='|' read -ra urls <<< "$BLTD_PROVISIONING_PROFILE_URL_LIST"
             for url in "${urls[@]}"; do
               curl -fsSL "$url" -o "$tmp"
               name=$(security cms -D -i "$tmp" | plutil -extract Name raw -o - -)
@@ -69,15 +68,12 @@ workflows:
             exit 1
     - certificate-and-profile-installer@1.12.0:
         inputs:
-        - certificate_url: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
-        - certificate_passphrase: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
+        - certificate_url: $BLTD_APPLE_CERTIFICATE_URL_LIST
+        - certificate_passphrase: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
         - provisioning_profile_url: $PROFILE_URL
         - install_defaults: "no"
         - keychain_path: $BITRISE_KEYCHAIN_PATH
         - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
-        # Two "Apple Development: Tooling Bot Bitrise (H3RAQJ3F2B)" Certificates are provided,
-        # only the older one is included in the selected Provisioning Profile.
-        - deduplicate_certificates: "true"
     - path::./:
         inputs:
         - platform: ios
